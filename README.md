@@ -24,27 +24,29 @@
 - [AI SDK](https://ai-sdk.dev/docs/introduction)
   - Unified API for generating text, structured objects, and tool calls with LLMs
   - Hooks for building dynamic chat and generative user interfaces
-  - Supports OpenAI, Anthropic, Google, xAI, and other model providers via AI Gateway
+  - Supports OpenAI, Anthropic and Google models, called directly via each provider's API
 - [shadcn/ui](https://ui.shadcn.com)
   - Styling with [Tailwind CSS](https://tailwindcss.com)
   - Component primitives from [Radix UI](https://radix-ui.com) for accessibility and flexibility
 - Data Persistence
   - [Neon Serverless Postgres](https://vercel.com/marketplace/neon) for saving chat history and user data
-  - [Vercel Blob](https://vercel.com/storage/blob) for efficient file storage
+  - [Cloudflare R2](https://developers.cloudflare.com/r2/) for efficient file storage
 - [Auth.js](https://authjs.dev)
   - Simple and secure authentication
 
 ## Model Providers
 
-This template uses the [Vercel AI Gateway](https://vercel.com/docs/ai-gateway) to access multiple AI models through a unified interface. Models are configured in `lib/ai/models.ts` with per-model provider routing. Included models: Mistral, Moonshot, DeepSeek, OpenAI, and xAI.
+This template uses the [AI SDK](https://ai-sdk.dev/docs/introduction), calling each provider directly (no Vercel AI Gateway involved) so it stays deployable outside Vercel. Models are configured in `lib/ai/models.ts`, and `lib/ai/providers.ts` resolves a model id (e.g. `anthropic/claude-haiku-4.5`) to the matching `@ai-sdk/*` provider call.
 
-### AI Gateway Authentication
+Set the API key for whichever provider(s) you want to use in `.env.local`:
 
-**For Vercel deployments**: Authentication is handled automatically via OIDC tokens.
+```bash
+ANTHROPIC_API_KEY=<your-anthropic-api-key>
+GOOGLE_GENERATIVE_AI_API_KEY=<your-google-ai-studio-api-key>
+OPENAI_API_KEY=<your-openai-api-key>
+```
 
-**For non-Vercel deployments**: You need to provide an AI Gateway API key by setting the `AI_GATEWAY_API_KEY` environment variable in your `.env.local` file.
-
-With the [AI SDK](https://ai-sdk.dev/docs/introduction), you can also switch to direct LLM providers like [OpenAI](https://openai.com), [Anthropic](https://anthropic.com), [Cohere](https://cohere.com/), and [many more](https://ai-sdk.dev/providers/ai-sdk-providers) with just a few lines of code.
+You only need the key for the model(s) you actually enable in `lib/ai/models.ts` — no need to set all three. To add another provider, install its `@ai-sdk/*` package and add a case to `resolveModel` in `lib/ai/providers.ts`.
 
 ## Deploy Your Own
 

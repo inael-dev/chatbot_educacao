@@ -1,4 +1,5 @@
-import { put } from "@vercel/blob";
+import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import { nanoid } from "nanoid";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
@@ -10,9 +11,20 @@ const FileSchema = z.object({
     .refine((file) => file.size <= 5 * 1024 * 1024, {
       message: "File size should be less than 5MB",
     })
-    .refine((file) => ["image/jpeg", "image/png"].includes(file.type), {
-      message: "File type should be JPEG or PNG",
-    }),
+    .refine(
+      (file) =>
+        ["image/jpeg", "image/png", "application/pdf"].includes(file.type),
+      { message: "File type should be JPEG, PNG or PDF" }
+    ),
+});
+
+const r2Client = new S3Client({
+  credentials: {
+    accessKeyId: process.env.R2_ACCESS_KEY_ID ?? "",
+    secretAccessKey: process.env.R2_SECRET_ACCESS_KEY ?? "",
+  },
+  endpoint: `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
+  region: "auto",
 });
 
 export async function POST(request: Request) {
@@ -46,14 +58,24 @@ export async function POST(request: Request) {
 
     const filename = (formData.get("file") as File).name;
     const safeName = filename.replace(/[^a-zA-Z0-9._-]/g, "_");
-    const fileBuffer = await file.arrayBuffer();
+    const pathname = `${nanoid()}-${safeName}`;
+    const fileBuffer = Buffer.from(await file.arrayBuffer());
 
     try {
-      const data = await put(`${safeName}`, fileBuffer, {
-        access: "public",
-      });
+      await r2Client.send(
+        new PutObjectCommand({
+          Body: fileBuffer,
+          Bucket: process.env.R2_BUCKET_NAME,
+          ContentType: file.type,
+          Key: pathname,
+        })
+      );
 
-      return NextResponse.json(data);
+      return NextResponse.json({
+        contentType: file.type,
+        pathname,
+        url: `${process.env.R2_PUBLIC_URL}/${pathname}`,
+      });
     } catch {
       return NextResponse.json({ error: "Upload failed" }, { status: 500 });
     }

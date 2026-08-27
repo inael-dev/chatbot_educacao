@@ -1,0 +1,663 @@
+/*
+ * Organic design system — component shapes ported from the "Adapta" mobile
+ * design handoff (design_handoff_adapta/_ds/organic-.../styles.css); color
+ * tokens, radii and typeface replaced 2026-08-25 with the "JobFinder — Light
+ * Blue Theme" palette (`Color Tokens.dc.html`, generated via Claude Design/
+ * Canvas — see reference_claude_design_canvas memory). Keep this in sync if
+ * either source is updated again.
+ *
+ * Scoping: token custom properties and base element resets are scoped under
+ * `.organic-theme` so this can be applied to a subtree (e.g. the future
+ * mobile-style dashboard shell) without affecting the rest of the app, which
+ * still runs on the shadcn/neutral theme in app/globals.css. Component
+ * classes (.btn, .card, .tag, ...) are left unscoped since their names are
+ * unique and they only resolve to something visible once inherited tokens
+ * are in scope.
+ */
+
+.organic-theme {
+  /* brand — canonical names from Color Tokens.dc.html */
+  --color-primary: #2e6df6;
+  --color-primary-deep: #3348d8;
+  --color-primary-light: #5b8bff;
+  --color-primary-tint: #e7eeff;
+  --color-primary-tint-brd: #d6e2ff;
+
+  /* neutrals */
+  --color-bg: #f6f7fb;
+  --color-surface: #ffffff;
+  --color-border: #ecedf3;
+  --color-ink: #171a2b;
+  --color-muted: #8a90a6;
+  --color-subtle: #a3a8bd;
+  --color-icon-idle: #b6bacb;
+
+  /* accents — logo tiles & status only, per the source file's rules of use */
+  --color-violet: #7c3aed;
+  --color-violet-light: #a855f7;
+  --color-green: #10b981;
+  --color-green-deep: #059669;
+  --color-mint: #4ade80;
+  --color-danger: #f04438;
+
+  /* device frame (mockup chrome — not expected to be used in-app) */
+  --color-frame: #11131c;
+  --color-frame-rim: #2b2e3d;
+
+  --grad-featured: linear-gradient(
+    140deg,
+    var(--color-primary),
+    var(--color-primary-deep)
+  );
+  --grad-avatar: linear-gradient(
+    135deg,
+    var(--color-primary-light),
+    var(--color-primary)
+  );
+  --grad-violet: linear-gradient(
+    135deg,
+    var(--color-violet-light),
+    var(--color-violet)
+  );
+  --grad-green: linear-gradient(
+    135deg,
+    var(--color-green),
+    var(--color-green-deep)
+  );
+  --grad-page: linear-gradient(160deg, #e9edf6, #dfe4f0);
+
+  /* aliases — keep the Organic component rules below (.btn, .card, .tag, ...)
+     working unchanged by mapping the old token names onto the new palette
+     instead of rewriting every rule. */
+  --color-text: var(--color-ink);
+  --color-accent: var(--color-primary);
+  --color-accent-2: var(--color-green);
+  --color-divider: var(--color-border);
+
+  --color-neutral-100: color-mix(in srgb, var(--color-ink) 6%, white);
+  --color-neutral-200: color-mix(in srgb, var(--color-ink) 12%, white);
+  --color-neutral-300: color-mix(in srgb, var(--color-ink) 22%, white);
+  --color-neutral-400: color-mix(in srgb, var(--color-ink) 35%, white);
+  --color-neutral-500: color-mix(in srgb, var(--color-ink) 50%, white);
+  --color-neutral-600: color-mix(in srgb, var(--color-ink) 65%, white);
+  --color-neutral-700: color-mix(in srgb, var(--color-ink) 78%, white);
+  --color-neutral-800: color-mix(in srgb, var(--color-ink) 88%, white);
+  --color-neutral-900: color-mix(in srgb, var(--color-ink) 96%, white);
+
+  --color-accent-100: color-mix(in srgb, var(--color-accent) 12%, white);
+  --color-accent-200: color-mix(in srgb, var(--color-accent) 24%, white);
+  --color-accent-300: color-mix(in srgb, var(--color-accent) 40%, white);
+  --color-accent-400: var(--color-primary-light);
+  --color-accent-500: var(--color-accent);
+  --color-accent-600: color-mix(in srgb, var(--color-accent) 85%, black);
+  --color-accent-700: color-mix(in srgb, var(--color-accent) 70%, black);
+  --color-accent-800: color-mix(in srgb, var(--color-accent) 55%, black);
+  --color-accent-900: color-mix(in srgb, var(--color-accent) 40%, black);
+
+  --color-accent-2-100: color-mix(in srgb, var(--color-accent-2) 12%, white);
+  --color-accent-2-200: color-mix(in srgb, var(--color-accent-2) 24%, white);
+  --color-accent-2-300: color-mix(in srgb, var(--color-accent-2) 40%, white);
+  --color-accent-2-400: color-mix(in srgb, var(--color-accent-2) 65%, white);
+  --color-accent-2-500: var(--color-accent-2);
+  --color-accent-2-600: color-mix(in srgb, var(--color-accent-2) 85%, black);
+  --color-accent-2-700: color-mix(in srgb, var(--color-accent-2) 70%, black);
+  --color-accent-2-800: color-mix(in srgb, var(--color-accent-2) 55%, black);
+  --color-accent-2-900: color-mix(in srgb, var(--color-accent-2) 40%, black);
+
+  --font-heading: var(--font-organic-heading), system-ui, sans-serif;
+  --font-heading-weight: 600;
+  --font-body: var(--font-organic-body), system-ui, sans-serif;
+
+  --space-1: 4.4px;
+  --space-2: 8.8px;
+  --space-3: 13.2px;
+  --space-4: 17.6px;
+  --space-6: 26.4px;
+  --space-8: 35.2px;
+
+  --radius-sm: 9px;
+  --radius-md: 15px;
+  --radius-lg: 20px;
+  --radius-btn: 12px;
+  --radius-hero: 24px;
+
+  --shadow-sm: 0 3px 8px rgba(40, 50, 90, 0.05);
+  --shadow-md: 0 4px 14px rgba(40, 50, 90, 0.05);
+  --shadow-lg: 0 18px 34px -14px rgba(46, 109, 246, 0.55);
+  font-family: var(--font-body);
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 1.55;
+  color: var(--color-text);
+
+  background: var(--color-bg);
+}
+
+.organic-theme * {
+  box-sizing: border-box;
+}
+
+.organic-theme h1,
+.organic-theme h2,
+.organic-theme h3,
+.organic-theme h4,
+.organic-theme h5,
+.organic-theme h6 {
+  margin: 0 0 var(--space-2);
+  font-family: var(--font-heading);
+  font-weight: var(--font-heading-weight);
+  line-height: 1.12;
+  letter-spacing: -0.015em;
+}
+.organic-theme h1 {
+  font-size: 42px;
+}
+.organic-theme h2 {
+  font-size: 32px;
+}
+.organic-theme h3 {
+  font-size: 25px;
+}
+.organic-theme h4 {
+  font-size: 20px;
+}
+.organic-theme h5 {
+  font-size: 16px;
+}
+.organic-theme h6 {
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.organic-theme p {
+  margin: 0 0 var(--space-3);
+}
+.organic-theme a {
+  color: var(--color-accent);
+  text-underline-offset: 3px;
+}
+.organic-theme img {
+  display: block;
+  max-width: 100%;
+}
+.organic-theme figure {
+  margin: 0;
+}
+.organic-theme figcaption {
+  margin-top: var(--space-1);
+  font-size: 11px;
+  color: color-mix(in srgb, var(--color-text) 55%, transparent);
+}
+.organic-theme .text-muted {
+  color: color-mix(in srgb, var(--color-text) 55%, transparent);
+}
+.organic-theme :focus {
+  outline: none;
+}
+.organic-theme :focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+.organic-theme ::selection {
+  background: color-mix(in srgb, var(--color-accent) 30%, transparent);
+}
+
+.organic-theme .washed {
+  filter: saturate(0.6) contrast(0.85) brightness(1.1) opacity(0.94);
+}
+
+/* — rules — */
+.organic-theme .hr {
+  height: 1px;
+  margin: var(--space-4) 0;
+  background: var(--color-divider);
+  border: 0;
+}
+
+/* — buttons — */
+.btn {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-2) calc(var(--space-3) * 1.2);
+  font-family: var(--font-heading);
+  font-size: 14px;
+  font-weight: var(--font-heading-weight);
+  line-height: 1.2;
+  color: var(--color-text);
+  text-decoration: none;
+  cursor: pointer;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--radius-btn);
+}
+.btn svg {
+  display: block;
+}
+.btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+.btn-primary {
+  color: var(--color-bg);
+  background: var(--color-accent);
+}
+.btn-primary:hover {
+  background: var(--color-accent-600);
+}
+.btn-primary:active {
+  background: var(--color-accent-700);
+}
+.btn-secondary {
+  border-color: var(--color-divider);
+}
+.btn-secondary:hover {
+  background: color-mix(in srgb, var(--color-text) 7%, transparent);
+}
+.btn-secondary:active {
+  background: color-mix(in srgb, var(--color-text) 14%, transparent);
+}
+.btn-ghost {
+  padding-inline: var(--space-1);
+  color: var(--color-accent);
+}
+.btn-ghost:hover {
+  background: color-mix(in srgb, var(--color-accent) 10%, transparent);
+}
+.btn-ghost:active {
+  background: color-mix(in srgb, var(--color-accent) 18%, transparent);
+}
+.btn-icon {
+  width: 36px;
+  height: 36px;
+  padding: 0;
+}
+.btn-block {
+  width: 100%;
+  margin-top: var(--space-2);
+}
+
+/* — forms — */
+.field > label {
+  display: block;
+  margin-bottom: 5px;
+  font-size: 12px;
+  color: color-mix(in srgb, var(--color-text) 70%, transparent);
+}
+.input {
+  width: 100%;
+  min-height: 36px;
+  padding: 6px 14px;
+  font: inherit;
+  font-size: 14px;
+  color: var(--color-text);
+  caret-color: var(--color-accent);
+  background: var(--color-surface);
+  border: 1px solid var(--color-divider);
+  border-radius: var(--radius-md);
+}
+.input:hover {
+  border-color: color-mix(in srgb, var(--color-text) 45%, transparent);
+}
+.input:focus-visible {
+  outline-offset: 0;
+  border-color: var(--color-accent);
+}
+textarea.input {
+  min-height: 90px;
+  resize: vertical;
+  border-radius: var(--radius-md);
+}
+.input-pill {
+  border-radius: 999px;
+}
+.radio {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  font-size: 14px;
+  cursor: pointer;
+}
+.radio input,
+.seg-opt input {
+  position: absolute;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+  opacity: 0;
+}
+.radio .dot {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  border: 1.5px solid var(--color-divider);
+  border-radius: 50%;
+}
+.radio:hover .dot {
+  border-color: var(--color-accent);
+}
+.radio input:checked + .dot {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  box-shadow: inset 0 0 0 4px var(--color-bg);
+}
+.radio input:focus-visible + .dot {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+.seg {
+  display: inline-flex;
+  overflow: hidden;
+  border: 1px solid var(--color-divider);
+  border-radius: var(--radius-btn);
+}
+.seg-opt {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+  padding: 7px 12px;
+  font-size: 13px;
+  cursor: pointer;
+}
+.seg-opt + .seg-opt {
+  border-left: 1px solid var(--color-divider);
+}
+.seg-opt:has(input:checked) {
+  color: var(--color-bg);
+  background: var(--color-accent);
+}
+.seg-opt:not(:has(input:checked)):hover {
+  background: color-mix(in srgb, var(--color-text) 7%, transparent);
+}
+.seg-opt:has(input:focus-visible) {
+  outline: 2px solid var(--color-accent);
+  outline-offset: -2px;
+}
+
+/* — cards — */
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+}
+.card-kicker {
+  font-size: 10px;
+  color: var(--color-accent);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+.card-title {
+  font-family: var(--font-heading);
+  font-size: 17px;
+  font-weight: var(--font-heading-weight);
+  line-height: 1.2;
+}
+.card-body {
+  flex: 1;
+  margin: 0;
+  font-size: 13px;
+  opacity: 0.8;
+}
+.card-meta {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  font-size: 11px;
+  color: color-mix(in srgb, var(--color-text) 50%, transparent);
+}
+.elev-sm {
+  box-shadow: var(--shadow-sm);
+}
+.elev-md {
+  box-shadow: var(--shadow-md);
+}
+.elev-lg {
+  box-shadow: var(--shadow-lg);
+}
+
+/* — tags — */
+.tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  font-size: 11px;
+  letter-spacing: 0.02em;
+  border-radius: var(--radius-sm);
+}
+.tag-accent {
+  color: var(--color-accent-800);
+  background: var(--color-accent-100);
+}
+.tag-accent-2 {
+  color: var(--color-accent-2-800);
+  background: var(--color-accent-2-100);
+}
+.tag-neutral {
+  color: var(--color-neutral-800);
+  background: var(--color-neutral-100);
+}
+.tag-outline {
+  color: var(--color-accent);
+  border: 1px solid var(--color-accent);
+}
+
+/* — navigation — */
+.organic-theme .nav {
+  display: flex;
+  gap: var(--space-4);
+  align-items: center;
+  padding: var(--space-3) var(--space-4);
+  border-bottom: none;
+}
+.organic-theme .nav-brand {
+  margin-right: auto;
+  font-family: var(--font-heading);
+  font-size: 18px;
+  font-weight: var(--font-heading-weight);
+}
+.organic-theme .nav a {
+  font-size: 14px;
+  color: inherit;
+  text-decoration: none;
+}
+.organic-theme .nav a:hover,
+.organic-theme .nav a[aria-current="page"] {
+  color: var(--color-accent);
+}
+
+/* — tables — */
+.table {
+  width: 100%;
+  font-size: 14px;
+  border-collapse: collapse;
+}
+.table th {
+  padding: var(--space-2);
+  font-size: 11px;
+  color: color-mix(in srgb, var(--color-text) 60%, transparent);
+  text-align: left;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  border-bottom: 1px solid var(--color-divider);
+}
+.table td {
+  padding: var(--space-2);
+  border-bottom: 1px solid color-mix(in srgb, var(--color-text) 8%, transparent);
+}
+.table tbody tr:hover {
+  background: color-mix(in srgb, var(--color-text) 4%, transparent);
+}
+
+/* — dialog — */
+.dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: var(--space-4);
+  background: color-mix(in srgb, var(--color-neutral-900) 50%, transparent);
+}
+.dialog {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  width: min(440px, 100%);
+  padding: var(--space-4);
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+}
+.dialog-title {
+  font-family: var(--font-heading);
+  font-size: 20px;
+  font-weight: var(--font-heading-weight);
+}
+.dialog-body {
+  font-size: 14px;
+  opacity: 0.85;
+}
+.dialog-actions {
+  display: flex;
+  gap: var(--space-2);
+  justify-content: flex-end;
+  margin-top: var(--space-2);
+}
+
+/* — avatars — */
+.av {
+  display: grid;
+  flex: none;
+  place-items: center;
+  font-family: var(--font-heading);
+  font-weight: var(--font-heading-weight);
+  color: var(--color-bg);
+  border-radius: 50%;
+}
+
+/* — list rows (student rows, etc.) — */
+.srow {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 11px 4px;
+  border-bottom: 1px solid var(--color-divider);
+}
+.srow:last-child {
+  border-bottom: none;
+}
+
+/* — status pill — */
+.pill {
+  padding: 3px 9px;
+  font: 600 10px var(--font-body);
+  border-radius: var(--radius-sm);
+}
+
+/* — chat bubbles — */
+.msg {
+  max-width: 80%;
+  padding: 11px 14px;
+  font-size: 13.5px;
+  line-height: 1.45;
+  border-radius: 20px;
+}
+.msg-ai {
+  align-self: flex-start;
+  color: var(--color-accent-2-900);
+  background: var(--color-accent-2-100);
+  border-bottom-left-radius: 6px;
+}
+.msg-me {
+  align-self: flex-end;
+  color: var(--color-bg);
+  background: var(--color-accent);
+  border-bottom-right-radius: 6px;
+}
+
+/* — choice cards (chat starter options) — */
+.choice-card {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 7px;
+  padding: 13px 12px;
+  text-align: left;
+  cursor: pointer;
+  background: var(--color-surface);
+  border: 1px solid var(--color-divider);
+  border-radius: 20px;
+}
+.choice-card:hover {
+  background: color-mix(in srgb, var(--color-text) 4%, var(--color-surface));
+}
+.choice-card-accent {
+  background: var(--color-accent-100);
+  border: 1.5px solid var(--color-accent-300);
+}
+.choice-card-accent:hover {
+  background: var(--color-accent-200);
+}
+.choice-card-title {
+  font-family: var(--font-heading);
+  font-size: 14px;
+  line-height: 1.1;
+  color: var(--color-text);
+}
+.choice-card-body {
+  font-size: 11px;
+  line-height: 1.35;
+  color: color-mix(in srgb, var(--color-text) 65%, transparent);
+}
+
+/* — horizontal chip row (student avatars in chat) — */
+.row-chips {
+  display: flex;
+  gap: 8px;
+  padding: 2px 0;
+  overflow-x: auto;
+}
+.schip {
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  gap: 5px;
+  align-items: center;
+  width: 58px;
+  text-decoration: none;
+}
+.schip span {
+  font-size: 10px;
+  color: var(--color-text);
+}
+
+/* — bottom tab bar (mobile-style persistent nav) — */
+.stab {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: space-around;
+  padding: 10px 8px calc(10px + env(safe-area-inset-bottom, 0px));
+  background: var(--color-surface);
+  border-top: 1px solid var(--color-divider);
+}
+.stab-link {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  align-items: center;
+  font: 600 9.5px var(--font-body);
+  color: color-mix(in srgb, var(--color-text) 50%, transparent);
+  text-decoration: none;
+  cursor: pointer;
+}
+.stab-link[aria-current] {
+  color: var(--color-accent);
+}
+.stab-link[aria-disabled="true"] {
+  pointer-events: none;
+  opacity: 0.4;
+}

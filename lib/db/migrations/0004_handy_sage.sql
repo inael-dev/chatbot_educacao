@@ -1,0 +1,1 @@
+ALTER TABLE "Atividade" DROP COLUMN "bnccCode";

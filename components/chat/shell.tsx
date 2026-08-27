@@ -1,16 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+import { toast } from "sonner";
 import { useActiveChat } from "@/hooks/use-active-chat";
 import {
   initialArtifactData,
@@ -44,8 +35,6 @@ export function ChatShell() {
     votes,
     currentModelId,
     setCurrentModelId,
-    showCreditCardAlert,
-    setShowCreditCardAlert,
   } = useActiveChat();
 
   const [editingMessage, setEditingMessage] = useState<ChatMessage | null>(
@@ -86,6 +75,42 @@ export function ChatShell() {
     setInput("");
   }, [setInput]);
 
+  const handleStartTurma = useCallback(() => {
+    setInput("Quero planejar uma atividade para a turma sobre ");
+  }, [setInput]);
+
+  const handleUploadPlano = useCallback(
+    async (file: File) => {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      try {
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/api/files/upload`,
+          { body: formData, method: "POST" }
+        );
+
+        if (!response.ok) {
+          const { error } = await response.json();
+          toast.error(error ?? "Falha ao enviar o arquivo, tente novamente.");
+          return;
+        }
+
+        const { url, pathname, contentType } = await response.json();
+        setAttachments((current) => [
+          ...current,
+          { contentType, name: pathname, url },
+        ]);
+        setInput(
+          "Segue o plano de aula da turma em anexo. Adapte para os alunos que precisam de apoio."
+        );
+      } catch {
+        toast.error("Falha ao enviar o arquivo, tente novamente.");
+      }
+    },
+    [setInput]
+  );
+
   const handleSendEditedMessage = useCallback(async () => {
     if (!editingMessage) {
       return;
@@ -101,14 +126,6 @@ export function ChatShell() {
     });
     setInput("");
   }, [editingMessage, input, regenerate, setInput, setMessages]);
-
-  const handleActivateGateway = useCallback(() => {
-    window.open(
-      "https://vercel.com/d?to=%2F%5Bteam%5D%2F%7E%2Fai%3Fmodal%3Dadd-credit-card",
-      "_blank"
-    );
-    window.location.href = `${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/`;
-  }, []);
 
   return (
     <>
@@ -134,6 +151,8 @@ export function ChatShell() {
               isReadonly={isReadonly}
               messages={messages}
               onEditMessage={handleEditMessage}
+              onStartTurma={handleStartTurma}
+              onUploadPlano={handleUploadPlano}
               regenerate={regenerate}
               selectedModelId={currentModelId}
               setMessages={setMessages}
@@ -189,28 +208,6 @@ export function ChatShell() {
       </div>
 
       <DataStreamHandler />
-
-      <AlertDialog
-        onOpenChange={setShowCreditCardAlert}
-        open={showCreditCardAlert}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Activate AI Gateway</AlertDialogTitle>
-            <AlertDialogDescription>
-              This application requires{" "}
-              {process.env.NODE_ENV === "production" ? "the owner" : "you"} to
-              activate Vercel AI Gateway.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleActivateGateway}>
-              Activate
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </>
   );
 }

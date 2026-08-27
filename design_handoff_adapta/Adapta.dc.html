@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics>
+<meta name="design_doc_mode" content="canvas">
+<link rel="stylesheet" href="_ds/organic-fca2326c-a815-4468-a345-a30a652755f5/styles.css">
+<script src="_ds/organic-fca2326c-a815-4468-a345-a30a652755f5/_ds_bundle.js"></script>
+<style>
+  body{margin:0;background:#efe3cf;font-family:var(--font-body)}
+  .dv-turn{padding:44px 48px 36px;border-bottom:1px solid rgba(46,43,37,.1);scroll-margin-top:16px}
+  .dv-thd{display:flex;align-items:baseline;gap:10px;margin:0 0 6px}
+  .dv-tid{font:600 10px ui-monospace,Menlo,monospace;padding:3px 7px;background:#2e2b25;color:#f5ead8;border-radius:6px;text-decoration:none}
+  .dv-tname{font:600 14px/1.2 var(--font-body);color:#2e2b25}
+  .dv-lede{font:400 14px/1.55 var(--font-body);color:rgba(46,43,37,.62);max-width:70ch;margin:0 0 26px}
+  .dv-opts{display:flex;flex-wrap:wrap;gap:40px;align-items:flex-start}
+  .dv-opt{flex:none;display:flex;flex-direction:column;gap:12px;scroll-margin-top:16px}
+  .dv-oid{font:600 10.5px ui-monospace,Menlo,monospace;padding:3px 7px;background:rgba(46,43,37,.1);color:#2e2b25;border-radius:6px;text-decoration:none}
+  .dv-olabel{display:flex;align-items:baseline;gap:9px;font:400 12px/1.4 var(--font-body);color:rgba(46,43,37,.6);max-width:340px}
+  .dv-olabel b{color:#2e2b25;font-weight:600}
+  .dv-opt:target .dv-oid{background:var(--color-accent);color:#f5ead8}
+  .dv-next{margin:26px 0 0;font:13px/1.6 var(--font-body);color:rgba(46,43,37,.55)}
+  .dv-next a{color:var(--color-accent);text-decoration:none}
+  a{color:var(--color-accent)}
+  /* phone */
+  .ph{width:344px;background:#2e2b25;border-radius:46px;padding:11px;box-shadow:0 20px 44px rgba(46,43,37,.3)}
+  .ph-scr{background:var(--color-bg);border-radius:36px;overflow:hidden;height:724px;display:flex;flex-direction:column;position:relative}
+  .ph-sb{display:flex;justify-content:space-between;align-items:center;padding:14px 26px 6px;font:600 13px var(--font-body);color:#2e2b25;flex:none}
+  .ph-body{flex:1;overflow:hidden;display:flex;flex-direction:column}
+  .msg{max-width:80%;padding:11px 14px;border-radius:20px;font-size:13.5px;line-height:1.45}
+  .msg-ai{align-self:flex-start;background:var(--color-accent-2-100);color:var(--color-accent-2-900);border-bottom-left-radius:6px}
+  .msg-me{align-self:flex-end;background:var(--color-accent);color:var(--color-bg);border-bottom-right-radius:6px}
+  .av{border-radius:50%;display:grid;place-items:center;font-family:var(--font-heading);color:var(--color-bg);flex:none}
+  .row-chips{display:flex;gap:8px;overflow-x:auto;padding:2px 0}
+  .schip{flex:none;display:flex;flex-direction:column;align-items:center;gap:5px;width:58px}
+  .stab{display:flex;justify-content:space-around;align-items:center;padding:10px 8px 22px;border-top:1px solid var(--color-divider);background:var(--color-surface);flex:none}
+  .stab a{display:flex;flex-direction:column;align-items:center;gap:3px;font:600 9.5px var(--font-body);color:rgba(46,43,37,.5);text-decoration:none}
+  .stab a[aria-current]{color:var(--color-accent)}
+  .srow{display:flex;align-items:center;gap:12px;padding:11px 4px;border-bottom:1px solid color-mix(in srgb,#201e1d 7%,transparent)}
+  .pill{font:600 10px var(--font-body);padding:3px 9px;border-radius:999px}
+</style>
+</helmet>
+
+<section class="dv-turn" style="border-bottom:2px solid rgba(46,43,37,.14)">
+  <div class="dv-thd"><span class="dv-tid" style="background:var(--color-accent)">brief</span><span class="dv-tname">Adapta · IA para adaptação inclusiva de atividades</span></div>
+  <p class="dv-lede"><b style="color:#2e2b25">Premissas que estou seguindo</b> — fluxo <b style="color:#2e2b25">turma-primeiro</b>: o professor descreve a atividade da turma uma vez, a IA monta o plano com habilidade BNCC real, e a adaptação é gerada <b style="color:#2e2b25">um aluno por vez</b>. Interação <b style="color:#2e2b25">híbrida</b> (chat + telas estruturadas), histórico do aluno como apoio discreto, colaboração <b style="color:#2e2b25">regente ↔ AEE em destaque</b> (o diferencial de mercado) e exportação em <b style="color:#2e2b25">PDF</b>. "Adapta" é só um nome de trabalho. Abaixo, 3 direções pro <b style="color:#2e2b25">núcleo</b> do app — escolha uma (ou misture) e eu detalho as 8 telas.</p>
+</section>
+
+<section class="dv-turn" id="t3">
+  <div class="dv-thd"><a class="dv-tid" href="#t3">3</a><span class="dv-tname">Adaptar para um aluno — construção do plano individual (PEI)</span></div>
+  <p class="dv-lede">Ao tocar num aluno em "Quer adaptar essa atividade pra algum aluno?", abre a <b style="color:#2e2b25">construção do plano daquele aluno</b>. A IA já parte do que sabe dele (perfil + histórico) e propõe uma primeira versão; o professor <b style="color:#2e2b25">refina em conversa</b> — como um PEI construído a quatro mãos — até aceitar e <b style="color:#2e2b25">gerar o PDF</b>. A mesma habilidade BNCC da turma se mantém; só as barreiras de acesso mudam.</p>
+  <div class="dv-opts">
+
+    <!-- 3a — Construtor: chat + prévia viva -->
+    <div class="dv-opt" id="3a">
+      <div class="dv-olabel"><a class="dv-oid" href="#3a">3a</a><span><b>Construtor da adaptação.</b> Topo fixo com o aluno e o que a IA está considerando (TEA · PECS · "engajou com dinossauros"). A prévia da atividade fica viva no fio; o professor pede ajustes por chat ou por chips rápidos. Rodapé: <b>Aceitar e gerar PDF</b>.</span></div>
+      <div class="ph">
+        <div class="ph-scr">
+          <div class="ph-sb"><span>9:41</span><span><svg width="17" height="12" viewBox="0 0 24 24" fill="#2e2b25"><path d="M2 17h2v-4H2v4zm4 0h2V9H6v8zm4 0h2V5h-2v12zm4 0h2V8h-2v9zm4 0h2V3h-2v14z"/></svg></span></div>
+          <div class="ph-body">
+            <div style="flex:none;padding:6px 16px 10px;border-bottom:1px solid var(--color-divider)">
+              <div style="display:flex;align-items:center;gap:10px">
+                <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#2e2b25" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+                <div class="av" style="width:36px;height:36px;background:var(--color-accent);font-size:14px">M</div>
+                <div style="flex:1;line-height:1.1"><div style="font-family:var(--font-heading);font-size:15px;color:#2e2b25">Plano do Miguel</div><div style="font-size:10.5px;color:rgba(46,43,37,.5)">Dezenas e unidades · EF03MA02</div></div>
+                <span class="pill" style="background:var(--color-accent-200);color:var(--color-accent-800)">Rascunho</span>
+              </div>
+              <div style="display:flex;gap:6px;overflow-x:auto;margin-top:9px"><span class="tag tag-accent-2" style="flex:none">TEA</span><span class="tag tag-neutral" style="flex:none">PECS / apoio visual</span><span class="tag tag-neutral" style="flex:none">engajou: dinossauros</span></div>
+            </div>
+            <div style="flex:1;overflow:hidden;padding:12px 16px;display:flex;flex-direction:column;gap:11px">
+              <div class="msg msg-ai">Considerei o que sei do Miguel: enunciado curto, apoio visual e tema que engaja. Fiz esta primeira versão 👇</div>
+              <div class="card elev-sm" style="align-self:stretch;background:var(--color-surface);padding:13px;gap:8px">
+                <div style="display:flex;align-items:center;justify-content:space-between"><div class="card-kicker">Prévia · versão do Miguel</div><span class="tag tag-outline" style="padding:1px 7px">v1</span></div>
+                <div style="font-family:var(--font-heading);font-size:16px;color:#2e2b25;line-height:1.1">Contando dinossauros em grupos de 10</div>
+                <div style="display:flex;gap:7px"><div style="flex:1;height:44px;border-radius:12px;background:var(--color-accent-2-100);display:grid;place-items:center"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent-2-700)" stroke-width="2.5"><rect x="3" y="3" width="18" height="18" rx="4"/><path d="M3 9h18M9 3v18"/></svg></div><div style="flex:1;height:44px;border-radius:12px;background:var(--color-accent-100);display:grid;place-items:center"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent-700)" stroke-width="2.5"><circle cx="12" cy="12" r="9"/><path d="M8 12h8"/></svg></div><div style="flex:1;height:44px;border-radius:12px;background:var(--color-neutral-200);display:grid;place-items:center"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--color-neutral-600)" stroke-width="2.5"><path d="M12 3v18M3 12h18"/></svg></div></div>
+                <p style="margin:0;font-size:12px;color:rgba(46,43,37,.72);line-height:1.4">"Agrupe os dinossauros de 10 em 10. Quantos grupos você fez?" — com figuras pra colar e espaço pra resposta.</p>
+              </div>
+              <div class="msg msg-me">Ótimo. Deixa só o enunciado com uma frase por vez.</div>
+              <div class="row-chips" style="gap:7px">
+                <span class="tag tag-outline" style="flex:none;padding:6px 11px">Trocar tema</span>
+                <span class="tag tag-outline" style="flex:none;padding:6px 11px">Menos texto</span>
+                <span class="tag tag-outline" style="flex:none;padding:6px 11px">+ apoio visual</span>
+                <span class="tag tag-outline" style="flex:none;padding:6px 11px">Mais fácil</span>
+              </div>
+            </div>
+            <div style="flex:none;padding:9px 14px 8px;display:flex;gap:9px;align-items:center;border-top:1px solid var(--color-divider)">
+              <div style="flex:1;background:var(--color-surface);border:1px solid var(--color-divider);border-radius:999px;padding:9px 14px;font-size:13px;color:rgba(46,43,37,.45)">Peça um ajuste…</div>
+              <div class="av" style="width:38px;height:38px;background:var(--color-accent)"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#f5ead8" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 7-7 7 7"/><path d="M12 19V5"/></svg></div>
+            </div>
+            <div style="flex:none;padding:0 14px 16px"><button class="btn btn-primary btn-block" style="height:48px;font-size:14.5px">Aceitar e gerar PDF<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></button></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3b — Atividade final + PDF -->
+    <div class="dv-opt" id="3b">
+      <div class="dv-olabel"><a class="dv-oid" href="#3b">3b</a><span><b>Versão final + PDF.</b> Ao aceitar, o plano vira uma atividade pronta pra imprimir: nome do aluno, enunciado adaptado, apoio visual e espaço de resposta. Fica salva como rascunho validado em <b>/atividades</b>; daqui exporta o PDF ou registra o feedback depois de aplicar.</span></div>
+      <div class="ph">
+        <div class="ph-scr">
+          <div class="ph-sb"><span>9:41</span><span><svg width="17" height="12" viewBox="0 0 24 24" fill="#2e2b25"><path d="M2 17h2v-4H2v4zm4 0h2V9H6v8zm4 0h2V5h-2v12zm4 0h2V8h-2v9zm4 0h2V3h-2v14z"/></svg></span></div>
+          <div class="ph-body">
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 18px 8px">
+              <div style="display:flex;align-items:center;gap:10px"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#2e2b25" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg><div style="font-family:var(--font-heading);font-size:16px;color:#2e2b25">Atividade pronta</div></div>
+              <span class="tag tag-accent-2" style="display:flex;gap:5px;align-items:center"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Validada</span>
+            </div>
+            <div style="flex:1;overflow:hidden;padding:6px 16px;display:flex;flex-direction:column;gap:12px">
+              <div style="background:#fff;border-radius:16px;box-shadow:var(--shadow-md);padding:16px;display:flex;flex-direction:column;gap:11px;flex:1;overflow:hidden">
+                <div style="display:flex;align-items:center;justify-content:space-between;border-bottom:1.5px dashed var(--color-divider);padding-bottom:9px">
+                  <div style="line-height:1.15"><div style="font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:rgba(46,43,37,.5)">Nome</div><div style="font-family:var(--font-heading);font-size:16px;color:#2e2b25">Miguel Andrade</div></div>
+                  <span class="tag tag-accent" style="padding:2px 8px">EF03MA02</span>
+                </div>
+                <div style="font-family:var(--font-heading);font-size:17px;color:#2e2b25;line-height:1.15">Contando dinossauros em grupos de 10</div>
+                <div style="display:flex;gap:8px"><div style="flex:1;aspect-ratio:1;border-radius:14px;background:var(--color-accent-2-100);display:grid;place-items:center"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent-2-700)" stroke-width="2.25"><rect x="3" y="3" width="18" height="18" rx="4"/><path d="M3 9h18M9 3v18"/></svg></div><div style="flex:1;aspect-ratio:1;border-radius:14px;background:var(--color-accent-100);display:grid;place-items:center"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent-700)" stroke-width="2.25"><circle cx="12" cy="12" r="9"/><path d="M8 12h8"/></svg></div><div style="flex:1;aspect-ratio:1;border-radius:14px;background:var(--color-neutral-200);display:grid;place-items:center"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="var(--color-neutral-600)" stroke-width="2.25"><path d="M12 3v18M3 12h18"/></svg></div></div>
+                <p style="margin:0;font-size:13.5px;color:#2e2b25;line-height:1.5">Agrupe os dinossauros de <b>10 em 10</b>.<br>Quantos grupos você fez?</p>
+                <div style="flex:1;border:1.5px dashed var(--color-neutral-300);border-radius:14px;min-height:52px;display:grid;place-items:center;color:rgba(46,43,37,.35);font-size:12px">Espaço para a resposta</div>
+              </div>
+            </div>
+            <div style="flex:none;padding:11px 16px 18px;display:flex;gap:9px">
+              <button class="btn btn-secondary" style="height:48px;flex:none;width:48px;padding:0" aria-label="Salvar em Atividades"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><path d="M17 21v-8H7v8M7 3v5h8"/></svg></button>
+              <button class="btn btn-primary" style="height:48px;flex:1;font-size:14.5px">Exportar PDF<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg></button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <p class="dv-next">Fluxo fechado: aluno → <a class="dv-oid" href="#3a">3a</a> construir (como PEI) → <a class="dv-oid" href="#3b">3b</a> aceitar e gerar PDF. Próximo: "cria o perfil do aluno + histórico" · "mostra a tela /atividades com todos os rascunhos" · "e o PDF em tamanho A4 de verdade?"</p>
+</section>
+
+<section class="dv-turn" id="t2">
+  <div class="dv-thd"><a class="dv-tid" href="#t2">2</a><span class="dv-tname">Plano completo da turma (ao tocar "Ver plano completo" em <a class="dv-oid" href="#1a">1a</a>)</span></div>
+  <p class="dv-lede">É o plano <b style="color:#2e2b25">da turma inteira</b> — montado uma vez pela IA a partir do que você descreveu. Aqui você lê, edita e valida antes de partir pra adaptação por aluno. A habilidade BNCC é <b style="color:#2e2b25">real (consultada)</b>, com objetivo, recursos, os momentos da aula e a avaliação.</p>
+  <div class="dv-opts">
+    <div class="dv-opt" id="2a">
+      <div class="dv-olabel"><a class="dv-oid" href="#2a">2a</a><span><b>Plano da turma.</b> Cabeçalho com a habilidade BNCC, blocos de objetivo/recursos, a sequência da aula (abertura → desenvolvimento → fechamento) e avaliação. Tudo editável; o rodapé leva à adaptação por aluno.</span></div>
+      <div class="ph">
+        <div class="ph-scr">
+          <div class="ph-sb"><span>9:41</span><span><svg width="17" height="12" viewBox="0 0 24 24" fill="#2e2b25"><path d="M2 17h2v-4H2v4zm4 0h2V9H6v8zm4 0h2V5h-2v12zm4 0h2V8h-2v9zm4 0h2V3h-2v14z"/></svg></span></div>
+          <div class="ph-body">
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 18px 8px">
+              <div style="display:flex;align-items:center;gap:11px">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#2e2b25" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+                <div style="font-family:var(--font-heading);font-size:16px;color:#2e2b25">Plano da aula</div>
+              </div>
+              <a class="btn btn-ghost" style="padding:2px 0;font-size:13px;display:flex;gap:5px;align-items:center"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>Editar</a>
+            </div>
+            <div style="flex:1;overflow:hidden;padding:2px 16px;display:flex;flex-direction:column;gap:13px">
+              <div>
+                <div style="font-family:var(--font-heading);font-size:24px;color:#2e2b25;line-height:1.05">Dezenas e unidades</div>
+                <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px"><span class="tag tag-accent">BNCC EF03MA02</span><span class="tag tag-neutral">3º ano</span><span class="tag tag-neutral">Matemática</span></div>
+              </div>
+              <div class="card elev-sm" style="background:var(--color-accent-2-100);padding:13px;gap:5px">
+                <div class="card-kicker" style="color:var(--color-accent-2-800)">Habilidade BNCC</div>
+                <p style="margin:0;font-size:12.5px;color:var(--color-accent-2-900);line-height:1.42">Comparar e ordenar números naturais de até quatro ordens; compor e decompor em dezenas e unidades.</p>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:4px">
+                <div style="font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:rgba(46,43,37,.5);font-weight:600">Objetivo</div>
+                <p style="margin:0;font-size:13px;color:#2e2b25;line-height:1.45">Que os alunos agrupem quantidades em dezenas e registrem as unidades restantes.</p>
+              </div>
+              <div style="display:flex;gap:8px">
+                <div style="flex:1;background:var(--color-surface);border-radius:16px;padding:10px 12px"><div style="font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:rgba(46,43,37,.5)">Duração</div><div style="font-family:var(--font-heading);font-size:16px;color:#2e2b25">50 min</div></div>
+                <div style="flex:1;background:var(--color-surface);border-radius:16px;padding:10px 12px"><div style="font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:rgba(46,43,37,.5)">Recursos</div><div style="font-family:var(--font-heading);font-size:16px;color:#2e2b25">Palitos</div></div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:9px">
+                <div style="font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:rgba(46,43,37,.5);font-weight:600">Momentos da aula</div>
+                <div style="display:flex;gap:11px"><div class="av" style="width:26px;height:26px;background:var(--color-accent);font-size:12px">1</div><div style="font-size:12.5px;color:#2e2b25;line-height:1.35"><b>Abertura</b> — roda de conversa: quantos dias tem a semana?</div></div>
+                <div style="display:flex;gap:11px"><div class="av" style="width:26px;height:26px;background:var(--color-accent);font-size:12px">2</div><div style="font-size:12.5px;color:#2e2b25;line-height:1.35"><b>Desenvolvimento</b> — agrupar palitos em dezenas em duplas.</div></div>
+                <div style="display:flex;gap:11px"><div class="av" style="width:26px;height:26px;background:var(--color-accent);font-size:12px">3</div><div style="font-size:12.5px;color:#2e2b25;line-height:1.35"><b>Fechamento</b> — cada dupla registra o total no quadro.</div></div>
+              </div>
+              <div class="card elev-sm" style="background:var(--color-surface);padding:12px;gap:4px">
+                <div class="card-kicker">Avaliação</div>
+                <p style="margin:0;font-size:12.5px;color:rgba(46,43,37,.75);line-height:1.4">Observar se o aluno forma grupos de 10 e nomeia a quantidade de dezenas.</p>
+              </div>
+            </div>
+            <div style="flex:none;padding:11px 16px 18px;display:flex;gap:9px">
+              <button class="btn btn-secondary" style="height:48px;flex:none;width:48px;padding:0" aria-label="Exportar PDF"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg></button>
+              <button class="btn btn-primary" style="height:48px;flex:1;font-size:14.5px">Adaptar por aluno
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="dv-opt" id="2b">
+      <div class="dv-olabel"><a class="dv-oid" href="#2b">2b</a><span><b>Editando o plano.</b> Ao tocar "Editar" em <a class="dv-oid" href="#2a">2a</a>, os blocos viram campos. Título, objetivo e momentos são editáveis; a BNCC abre um seletor (nunca texto livre). Barra fixa com Cancelar / Salvar.</span></div>
+      <div class="ph">
+        <div class="ph-scr">
+          <div class="ph-sb"><span>9:41</span><span><svg width="17" height="12" viewBox="0 0 24 24" fill="#2e2b25"><path d="M2 17h2v-4H2v4zm4 0h2V9H6v8zm4 0h2V5h-2v12zm4 0h2V8h-2v9zm4 0h2V3h-2v14z"/></svg></span></div>
+          <div class="ph-body">
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 18px 8px">
+              <span style="font-size:14px;color:rgba(46,43,37,.6)">Cancelar</span>
+              <div style="font-family:var(--font-heading);font-size:16px;color:#2e2b25">Editar plano</div>
+              <span style="font-family:var(--font-heading);font-size:14px;color:var(--color-accent)">Salvar</span>
+            </div>
+            <div style="flex:1;overflow:hidden;padding:6px 16px;display:flex;flex-direction:column;gap:12px">
+              <div class="field"><label>Título da aula</label><input class="input" value="Dezenas e unidades"></div>
+              <div class="field"><label>Habilidade BNCC</label>
+                <div class="input" style="display:flex;align-items:center;justify-content:space-between;color:#2e2b25"><span style="display:flex;align-items:center;gap:7px"><span class="tag tag-accent" style="padding:2px 8px">EF03MA02</span></span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(46,43,37,.5)" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></div>
+                <div style="font-size:10.5px;color:rgba(46,43,37,.5);margin-top:5px">Selecionada da base oficial — não é digitada.</div>
+              </div>
+              <div class="field"><label>Objetivo</label><textarea class="input" style="min-height:64px">Que os alunos agrupem quantidades em dezenas e registrem as unidades restantes.</textarea></div>
+              <div class="field"><label style="display:flex;justify-content:space-between;align-items:center">Momentos da aula <span style="color:var(--color-accent);font-size:12px">+ Adicionar</span></label>
+                <div style="display:flex;flex-direction:column;gap:8px">
+                  <div style="display:flex;align-items:center;gap:9px;background:var(--color-surface);border:1px solid var(--color-divider);border-radius:999px;padding:8px 12px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="rgba(46,43,37,.4)" stroke-width="2.75" stroke-linecap="round"><path d="M3 12h18M3 6h18M3 18h18"/></svg><span style="flex:1;font-size:13px;color:#2e2b25">Abertura — roda de conversa</span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="rgba(46,43,37,.4)" stroke-width="2.75" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></div>
+                  <div style="display:flex;align-items:center;gap:9px;background:var(--color-surface);border:1px solid var(--color-divider);border-radius:999px;padding:8px 12px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="rgba(46,43,37,.4)" stroke-width="2.75" stroke-linecap="round"><path d="M3 12h18M3 6h18M3 18h18"/></svg><span style="flex:1;font-size:13px;color:#2e2b25">Desenvolvimento — agrupar palitos</span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="rgba(46,43,37,.4)" stroke-width="2.75" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></div>
+                  <div style="display:flex;align-items:center;gap:9px;background:var(--color-surface);border:1px solid var(--color-divider);border-radius:999px;padding:8px 12px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="rgba(46,43,37,.4)" stroke-width="2.75" stroke-linecap="round"><path d="M3 12h18M3 6h18M3 18h18"/></svg><span style="flex:1;font-size:13px;color:#2e2b25">Fechamento — registrar total</span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="rgba(46,43,37,.4)" stroke-width="2.75" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></div>
+                </div>
+              </div>
+              <div class="field"><label>Avaliação</label><textarea class="input" style="min-height:54px">Observar se o aluno forma grupos de 10 e nomeia a quantidade de dezenas.</textarea></div>
+            </div>
+            <div style="flex:none;padding:11px 16px 18px;display:flex;gap:9px">
+              <button class="btn btn-secondary" style="height:48px;flex:1">Cancelar</button>
+              <button class="btn btn-primary" style="height:48px;flex:1">Salvar plano</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <p class="dv-next">Próximo: "mostra a tela de gerar a atividade adaptada do Miguel" · "mostra o PDF final" · "cria o perfil do aluno + card de feedback"</p>
+</section>
+
+<section class="dv-turn" id="t1">
+  <div class="dv-thd"><a class="dv-tid" href="#t1">1</a><span class="dv-tname">Três direções pro fluxo central</span></div>
+  <div class="dv-opts">
+
+    <!-- 1a — CHAT NO CENTRO -->
+    <div class="dv-opt" id="1a">
+      <div class="dv-olabel"><a class="dv-oid" href="#1a">1a</a><span><b>Conversa no centro.</b> Tudo acontece no fio do chat: descrever a aula, ver o plano, tocar num aluno e receber a atividade adaptada. Rápido pra quem já pensa "falando".</span></div>
+      <div class="ph">
+        <div class="ph-scr">
+          <div class="ph-sb"><span>9:41</span><span style="display:flex;gap:5px;align-items:center"><svg width="17" height="12" viewBox="0 0 24 24" fill="#2e2b25"><path d="M2 17h2v-4H2v4zm4 0h2V9H6v8zm4 0h2V5h-2v12zm4 0h2V8h-2v9zm4 0h2V3h-2v14z"/></svg></span></div>
+          <div class="ph-body">
+            <div style="display:flex;align-items:center;gap:11px;padding:6px 18px 12px">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#2e2b25" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+              <div style="line-height:1.1"><div style="font-family:var(--font-heading);font-size:17px;color:#2e2b25">Nova aula</div><div style="font-size:11px;color:rgba(46,43,37,.5)">3º A · Matemática</div></div>
+            </div>
+            <div style="flex:1;overflow:hidden;padding:4px 16px;display:flex;flex-direction:column;gap:12px">
+              <div class="msg msg-ai">Oi, prof! Como quer começar a aula de hoje?</div>
+              <div style="align-self:stretch;display:flex;gap:9px">
+                <div style="flex:1;background:var(--color-surface);border:1px solid var(--color-divider);border-radius:20px;padding:13px 12px;display:flex;flex-direction:column;gap:7px">
+                  <div class="av" style="width:34px;height:34px;background:var(--color-accent-2-500)"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#f5ead8" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M8 12h8"/><path d="M12 8v8"/><circle cx="12" cy="12" r="10"/></svg></div>
+                  <div style="font-family:var(--font-heading);font-size:14px;color:#2e2b25;line-height:1.1">Descrever no chat</div>
+                  <div style="font-size:11px;color:rgba(46,43,37,.6);line-height:1.35">Conte a atividade e a IA monta o plano.</div>
+                </div>
+                <div style="flex:1;background:var(--color-accent-100);border:1.5px solid var(--color-accent-300);border-radius:20px;padding:13px 12px;display:flex;flex-direction:column;gap:7px">
+                  <div class="av" style="width:34px;height:34px;background:var(--color-accent)"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#f5ead8" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m17 8-5-5-5 5"/><path d="M12 3v12"/></svg></div>
+                  <div style="font-family:var(--font-heading);font-size:14px;color:#2e2b25;line-height:1.1">Anexar plano pronto</div>
+                  <div style="font-size:11px;color:var(--color-accent-800);line-height:1.35">Foto ou PDF — a IA extrai e organiza.</div>
+                </div>
+              </div>
+              <div class="msg msg-me" style="display:flex;align-items:center;gap:9px;padding:9px 12px">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f5ead8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
+                <div style="line-height:1.15"><div style="font-size:13px;font-weight:600">plano-aula-3A.pdf</div><div style="font-size:10.5px;opacity:.8">anexado · 1 página</div></div>
+              </div>
+              <div class="msg msg-ai" style="max-width:92%;padding:0;background:transparent">
+                <div class="card elev-sm" style="width:100%;background:var(--color-surface);padding:14px;gap:8px">
+                  <div class="card-kicker">Plano da aula</div>
+                  <div style="font-family:var(--font-heading);font-size:18px;color:#2e2b25;line-height:1.1">Dezenas e unidades</div>
+                  <div style="display:flex;gap:6px;flex-wrap:wrap"><span class="tag tag-accent">BNCC EF03MA02</span><span class="tag tag-neutral">Contagem</span></div>
+                  <p style="margin:2px 0 0;font-size:12px;color:rgba(46,43,37,.7);line-height:1.4">Agrupar quantidades em dezenas e registrar unidades restantes.</p>
+                  <a class="btn btn-ghost" style="align-self:flex-start;padding:2px 0;font-size:12.5px">Ver plano completo →</a>
+                </div>
+              </div>
+              <div class="msg msg-ai">Quer adaptar essa atividade pra algum aluno? Toque no nome.</div>
+              <div class="row-chips">
+                <div class="schip"><div class="av" style="width:44px;height:44px;background:var(--color-accent);font-size:16px">M</div><span style="font-size:10px;color:#2e2b25">Miguel</span></div>
+                <div class="schip"><div class="av" style="width:44px;height:44px;background:var(--color-accent-2-500);font-size:16px">A</div><span style="font-size:10px;color:#2e2b25">Ana</span></div>
+                <div class="schip"><div class="av" style="width:44px;height:44px;background:var(--color-neutral-500);font-size:16px">T</div><span style="font-size:10px;color:#2e2b25">Théo</span></div>
+                <div class="schip"><div class="av" style="width:44px;height:44px;background:var(--color-accent-400);font-size:16px">Bea</div><span style="font-size:10px;color:#2e2b25">Bea</span></div>
+              </div>
+            </div>
+            <div style="flex:none;padding:10px 14px 16px;display:flex;gap:9px;align-items:center;border-top:1px solid var(--color-divider)">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="rgba(46,43,37,.5)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+              <div style="flex:1;background:var(--color-surface);border:1px solid var(--color-divider);border-radius:999px;padding:9px 14px;font-size:13px;color:rgba(46,43,37,.45)">Mensagem…</div>
+              <div class="av" style="width:40px;height:40px;background:var(--color-accent)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f5ead8" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 7-7 7 7"/><path d="M12 19V5"/></svg></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 1b — TURMA PRIMEIRO (dashboard) -->
+    <div class="dv-opt" id="1b">
+      <div class="dv-olabel"><a class="dv-oid" href="#1b">1b</a><span><b>Turma primeiro.</b> Uma home com a aula do dia no topo e a lista de alunos abaixo, cada um com status. O chat é uma ferramenta; a visão geral da turma é o lar.</span></div>
+      <div class="ph">
+        <div class="ph-scr">
+          <div class="ph-sb"><span>9:41</span><span><svg width="17" height="12" viewBox="0 0 24 24" fill="#2e2b25"><path d="M2 17h2v-4H2v4zm4 0h2V9H6v8zm4 0h2V5h-2v12zm4 0h2V8h-2v9zm4 0h2V3h-2v14z"/></svg></span></div>
+          <div class="ph-body">
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 18px 10px">
+              <div><div style="font-size:11px;color:rgba(46,43,37,.5)">Segunda, 11 ago</div><div style="font-family:var(--font-heading);font-size:22px;color:#2e2b25;line-height:1">Turma 3º A</div></div>
+              <div class="av" style="width:40px;height:40px;background:var(--color-accent-2-500);font-size:14px">RB</div>
+            </div>
+            <div style="flex:1;overflow:hidden;padding:2px 16px;display:flex;flex-direction:column;gap:14px">
+              <div class="card elev-md" style="background:var(--color-accent);color:var(--color-bg);padding:16px;gap:9px">
+                <div style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;opacity:.8">Aula de hoje</div>
+                <div style="font-family:var(--font-heading);font-size:21px;line-height:1.05">Dezenas e unidades</div>
+                <div style="display:flex;gap:6px;flex-wrap:wrap"><span class="tag" style="background:rgba(245,234,216,.22);color:var(--color-bg)">BNCC EF03MA02</span><span class="tag" style="background:rgba(245,234,216,.22);color:var(--color-bg)">Matemática</span></div>
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-top:4px">
+                  <span style="font-size:12px;opacity:.85">5 alunos p/ adaptar</span>
+                  <span style="background:var(--color-bg);color:var(--color-accent);font:600 12px var(--font-body);padding:7px 14px;border-radius:999px">Abrir no chat</span>
+                </div>
+              </div>
+              <div style="display:flex;align-items:center;justify-content:space-between">
+                <div style="font-family:var(--font-heading);font-size:17px;color:#2e2b25">Alunos</div>
+                <div class="seg" style="transform:scale(.82);transform-origin:right"><label class="seg-opt" style="background:var(--color-accent);color:var(--color-bg)">Atípicos</label><label class="seg-opt">Todos</label></div>
+              </div>
+              <div style="display:flex;flex-direction:column;overflow:hidden">
+                <div class="srow"><div class="av" style="width:42px;height:42px;background:var(--color-accent);font-size:15px">M</div><div style="flex:1"><div style="font-size:14.5px;color:#2e2b25;font-weight:600">Miguel Andrade</div><span class="tag tag-accent-2" style="font-size:10px;padding:2px 8px">TEA</span></div><span class="pill" style="background:var(--color-accent-2-200);color:var(--color-accent-2-800)">Pronto</span></div>
+                <div class="srow"><div class="av" style="width:42px;height:42px;background:var(--color-accent-2-500);font-size:15px">A</div><div style="flex:1"><div style="font-size:14.5px;color:#2e2b25;font-weight:600">Ana Beatriz</div><span class="tag tag-accent-2" style="font-size:10px;padding:2px 8px">TDAH</span></div><span class="pill" style="background:var(--color-accent-200);color:var(--color-accent-800)">Rascunho</span></div>
+                <div class="srow"><div class="av" style="width:42px;height:42px;background:var(--color-neutral-500);font-size:15px">T</div><div style="flex:1"><div style="font-size:14.5px;color:#2e2b25;font-weight:600">Théo Lima</div><span class="tag tag-accent-2" style="font-size:10px;padding:2px 8px">DI</span></div><span class="pill" style="background:var(--color-neutral-200);color:var(--color-neutral-700)">Adaptar</span></div>
+                <div class="srow"><div class="av" style="width:42px;height:42px;background:var(--color-accent-400);font-size:14px">Bea</div><div style="flex:1"><div style="font-size:14.5px;color:#2e2b25;font-weight:600">Beatriz Rocha</div><span class="tag tag-accent-2" style="font-size:10px;padding:2px 8px">TEA</span></div><span class="pill" style="background:var(--color-neutral-200);color:var(--color-neutral-700)">Adaptar</span></div>
+              </div>
+            </div>
+            <div class="stab">
+              <a aria-current="page"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>Início</a>
+              <a><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>Atividades</a>
+              <a><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/></svg>Turma</a>
+              <a><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>Perfil</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 1c — PERFIL + COLABORAÇÃO AEE -->
+    <div class="dv-opt" id="1c">
+      <div class="dv-olabel"><a class="dv-oid" href="#1c">1c</a><span><b>Perfil do aluno + dupla pedagógica.</b> Antes de gerar, o professor vê quem é o aluno: histórico recente e a conversa com o professor de AEE. A adaptação nasce do contexto, não do nada.</span></div>
+      <div class="ph">
+        <div class="ph-scr">
+          <div class="ph-sb"><span>9:41</span><span><svg width="17" height="12" viewBox="0 0 24 24" fill="#2e2b25"><path d="M2 17h2v-4H2v4zm4 0h2V9H6v8zm4 0h2V5h-2v12zm4 0h2V8h-2v9zm4 0h2V3h-2v14z"/></svg></span></div>
+          <div class="ph-body">
+            <div style="display:flex;align-items:center;gap:11px;padding:6px 18px 6px">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#2e2b25" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+              <div style="font-family:var(--font-heading);font-size:16px;color:#2e2b25">Aluno</div>
+            </div>
+            <div style="flex:1;overflow:hidden;padding:6px 16px 4px;display:flex;flex-direction:column;gap:13px">
+              <div style="display:flex;align-items:center;gap:14px">
+                <div class="av washed" style="width:66px;height:66px;background:var(--color-accent);font-size:26px">M</div>
+                <div><div style="font-family:var(--font-heading);font-size:22px;color:#2e2b25;line-height:1">Miguel Andrade</div><div style="display:flex;gap:6px;margin-top:6px"><span class="tag tag-accent-2">TEA</span><span class="tag tag-neutral">8 anos</span></div></div>
+              </div>
+              <div class="card elev-sm" style="background:var(--color-surface);padding:14px;gap:10px">
+                <div class="card-kicker">Histórico recente</div>
+                <div style="display:flex;gap:10px"><div style="width:9px;height:9px;border-radius:50%;background:var(--color-accent-2-500);margin-top:4px;flex:none"></div><div style="font-size:12.5px;color:#2e2b25;line-height:1.4"><b>Reagiu muito bem</b> à tarefa com tema de dinossauros. <span style="color:rgba(46,43,37,.5)">5 ago</span></div></div>
+                <div style="display:flex;gap:10px"><div style="width:9px;height:9px;border-radius:50%;background:var(--color-accent-400);margin-top:4px;flex:none"></div><div style="font-size:12.5px;color:#2e2b25;line-height:1.4"><b>Dispersou</b> em atividade com muito texto corrido. <span style="color:rgba(46,43,37,.5)">2 ago</span></div></div>
+              </div>
+              <div class="card elev-sm" style="background:var(--color-accent-2-100);padding:14px;gap:9px">
+                <div style="display:flex;align-items:center;justify-content:space-between"><div class="card-kicker" style="color:var(--color-accent-2-800)">Dupla pedagógica</div><span style="font:600 10px var(--font-body);color:var(--color-accent-2-800)">AEE + Regente</span></div>
+                <div style="display:flex;gap:10px;align-items:flex-start">
+                  <div class="av" style="width:32px;height:32px;background:var(--color-accent-2-600);font-size:12px">P</div>
+                  <div style="background:var(--color-bg);border-radius:16px;border-bottom-left-radius:5px;padding:9px 12px;font-size:12.5px;color:#2e2b25;line-height:1.4">Ele usa comunicação por imagens (PECS). Prefira enunciado curto e apoio visual. — <b>Prof. Pâmela (AEE)</b></div>
+                </div>
+                <a class="btn btn-ghost" style="align-self:flex-start;padding:2px 0;font-size:12px;color:var(--color-accent-2-800)">Responder →</a>
+              </div>
+            </div>
+            <div style="flex:none;padding:12px 16px 18px">
+              <button class="btn btn-primary btn-block" style="height:50px;font-size:15px">Gerar atividade adaptada
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <p class="dv-next">Me diga onde ir: "vou de <a class="dv-oid" href="#1b">1b</a>, detalha as 8 telas" · "junta o histórico de <a class="dv-oid" href="#1c">1c</a> dentro do chat de <a class="dv-oid" href="#1a">1a</a>" · "quero ver a tela de revisão /atividades e o PDF" · "outras direções"</p>
+</section>
+</x-dc>
+</body>
+</html>

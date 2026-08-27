@@ -169,7 +169,7 @@ function PureMultimodalInput({
       setInput("");
       switch (cmd.action) {
         case "new":
-          router.push("/");
+          router.push("/nova-aula");
           break;
         case "clear":
           setMessages(() => []);
@@ -196,7 +196,7 @@ function PureMultimodalInput({
                   `${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/api/chat?id=${chatId}`,
                   { method: "DELETE" }
                 );
-                router.push("/");
+                router.push("/nova-aula");
                 toast.success("Chat deleted");
               },
             },
@@ -213,7 +213,7 @@ function PureMultimodalInput({
                     method: "DELETE",
                   }
                 );
-                router.push("/");
+                router.push("/nova-aula");
                 toast.success("All chats deleted");
               },
             },
@@ -556,7 +556,7 @@ function PureMultimodalInput({
             />
           </PromptInputTools>
 
-          {status === "submitted" ? (
+          {status === "submitted" || status === "streaming" ? (
             <StopButton setMessages={setMessages} stop={stop} />
           ) : (
             <PromptInputSubmit
@@ -801,6 +801,10 @@ function PureModelSelectorCompact({
     modelsData?.capabilities ?? modelsData;
   const dynamicModels: ChatModel[] | undefined = modelsData?.models;
   const activeModels = dynamicModels ?? chatModels;
+
+  if (activeModels.length <= 1) {
+    return null;
+  }
 
   const selectedModel =
     activeModels.find((m: ChatModel) => m.id === selectedModelId) ??

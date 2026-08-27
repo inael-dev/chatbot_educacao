@@ -1,3 +1,6 @@
+import type { AnthropicLanguageModelOptions } from "@ai-sdk/anthropic";
+import type { GoogleLanguageModelOptions } from "@ai-sdk/google";
+import type { OpenAILanguageModelResponsesOptions } from "@ai-sdk/openai";
 import { geolocation, ipAddress } from "@vercel/functions";
 import {
   convertToModelMessages,
@@ -18,14 +21,18 @@ import {
   chatModels,
   DEFAULT_CHAT_MODEL,
   getCapabilities,
-  getModelAvailability,
 } from "@/lib/ai/models";
 import { type RequestHints, systemPrompt } from "@/lib/ai/prompts";
 import { getLanguageModel } from "@/lib/ai/providers";
 import { createDocument } from "@/lib/ai/tools/create-document";
 import { editDocument } from "@/lib/ai/tools/edit-document";
 import { getWeather } from "@/lib/ai/tools/get-weather";
+import { listStudents } from "@/lib/ai/tools/list-students";
+import { lookupBnccHabilidade } from "@/lib/ai/tools/lookup-bncc-habilidade";
+import { lookupStudent } from "@/lib/ai/tools/lookup-student";
 import { requestSuggestions } from "@/lib/ai/tools/request-suggestions";
+import { saveAtividade } from "@/lib/ai/tools/save-atividade";
+import { updateAdaptacao } from "@/lib/ai/tools/update-adaptacao";
 import { updateDocument } from "@/lib/ai/tools/update-document";
 import { isProductionEnvironment } from "@/lib/constants";
 import {
@@ -195,7 +202,7 @@ export async function POST(request: Request) {
     }
 
     const modelConfig = chatModels.find((m) => m.id === chatModel);
-    const modelCapabilities = await getCapabilities();
+    const modelCapabilities = getCapabilities();
     const capabilities = modelCapabilities[chatModel];
     const isReasoningModel = capabilities?.reasoning === true;
     const supportsTools = capabilities?.tools === true;
@@ -236,20 +243,7 @@ export async function POST(request: Request) {
         writeWaitingStatus("waiting", "Waiting...");
 
         healthCheckTimer = setTimeout(() => {
-          getModelAvailability(chatModel)
-            .then((availability) => {
-              if (availability === "impacted") {
-                writeWaitingStatus(
-                  "health",
-                  `${modelName} may be slow or unavailable right now...`
-                );
-              } else {
-                writeWaitingStatus("still-waiting", "Still waiting...");
-              }
-            })
-            .catch(() => {
-              writeWaitingStatus("still-waiting", "Still waiting...");
-            });
+          writeWaitingStatus("still-waiting", "Still waiting...");
         }, HEALTH_CHECK_DELAY_MS);
 
         const markModelActive = () => {
@@ -276,6 +270,11 @@ export async function POST(request: Request) {
                   "editDocument",
                   "updateDocument",
                   "requestSuggestions",
+                  "listStudents",
+                  "lookupStudent",
+                  "lookupBnccHabilidade",
+                  "saveAtividade",
+                  "updateAdaptacao",
                 ],
           instructions: systemPrompt({ requestHints, supportsTools }),
           messages: modelMessages,
@@ -295,12 +294,16 @@ export async function POST(request: Request) {
             stopWaitingStatus();
           },
           providerOptions: {
-            ...(modelConfig?.gatewayOrder && {
-              gateway: { order: modelConfig.gatewayOrder },
-            }),
-            ...(modelConfig?.reasoningEffort && {
-              openai: { reasoningEffort: modelConfig.reasoningEffort },
-            }),
+            anthropic: {
+              thinking: { budgetTokens: 2048, type: "enabled" },
+            } satisfies AnthropicLanguageModelOptions,
+            google: {
+              thinkingConfig: { includeThoughts: true, thinkingLevel: "low" },
+            } satisfies GoogleLanguageModelOptions,
+            openai: {
+              reasoningEffort: modelConfig?.reasoningEffort ?? "low",
+              reasoningSummary: "detailed",
+            } satisfies OpenAILanguageModelResponsesOptions,
           },
           stopWhen: isStepCount(5),
           telemetry: {
@@ -315,11 +318,16 @@ export async function POST(request: Request) {
             }),
             editDocument: editDocument({ dataStream, session }),
             getWeather,
+            listStudents: listStudents({ session }),
+            lookupBnccHabilidade,
+            lookupStudent: lookupStudent({ session }),
             requestSuggestions: requestSuggestions({
               dataStream,
               modelId: chatModel,
               session,
             }),
+            saveAtividade: saveAtividade({ chatId: id, session }),
+            updateAdaptacao: updateAdaptacao({ session }),
             updateDocument: updateDocument({
               dataStream,
               modelId: chatModel,
@@ -388,17 +396,7 @@ export async function POST(request: Request) {
           });
         }
       },
-      onError: (error) => {
-        if (
-          error instanceof Error &&
-          error.message?.includes(
-            "AI Gateway requires a valid credit card on file to service requests"
-          )
-        ) {
-          return "AI Gateway requires a valid credit card on file to service requests. Please visit https://vercel.com/d?to=%2F%5Bteam%5D%2F%7E%2Fai%3Fmodal%3Dadd-credit-card to add a card and unlock your free credits.";
-        }
-        return "Oops, an error occurred!";
-      },
+      onError: () => "Oops, an error occurred!",
       originalMessages: isToolApprovalFlow ? uiMessages : undefined,
     });
 
@@ -428,15 +426,6 @@ export async function POST(request: Request) {
 
     if (error instanceof ChatbotError) {
       return error.toResponse();
-    }
-
-    if (
-      error instanceof Error &&
-      error.message?.includes(
-        "AI Gateway requires a valid credit card on file to service requests"
-      )
-    ) {
-      return new ChatbotError("bad_request:activate_gateway").toResponse();
     }
 
     console.error("Unhandled error in chat API:", error, { vercelId });

@@ -22,6 +22,8 @@ type MessagesProps = {
   isLoading?: boolean;
   selectedModelId: string;
   onEditMessage?: (message: ChatMessage) => void;
+  onStartTurma: () => void;
+  onUploadPlano: (file: File) => void;
 };
 
 function PureMessages({
@@ -37,6 +39,8 @@ function PureMessages({
   isLoading,
   selectedModelId: _selectedModelId,
   onEditMessage,
+  onStartTurma,
+  onUploadPlano,
 }: MessagesProps) {
   const {
     containerRef: messagesContainerRef,
@@ -66,8 +70,8 @@ function PureMessages({
   return (
     <div className="relative flex-1 bg-background">
       {messages.length === 0 && !isLoading && (
-        <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center">
-          <Greeting />
+        <div className="absolute inset-0 z-10 flex items-start justify-center overflow-y-auto pt-10 md:pt-16">
+          <Greeting onStartTurma={onStartTurma} onUploadPlano={onUploadPlano} />
         </div>
       )}
       <div
