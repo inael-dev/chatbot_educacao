@@ -1,4 +1,5 @@
 import { notFound, redirect } from "next/navigation";
+import { Suspense } from "react";
 import { AlunoProfile } from "@/components/organic/aluno/aluno-profile";
 import { OrganicShell } from "@/components/organic/organic-shell";
 import {
@@ -10,7 +11,19 @@ import {
 } from "@/lib/db/queries";
 import { auth } from "../../(auth)/auth";
 
-export default async function AlunoProfilePage({
+export default function AlunoProfilePage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  return (
+    <Suspense fallback={<div className="min-h-dvh" />}>
+      <AlunoProfileContent params={params} />
+    </Suspense>
+  );
+}
+
+async function AlunoProfileContent({
   params,
 }: {
   params: Promise<{ id: string }>;

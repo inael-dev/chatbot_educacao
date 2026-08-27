@@ -1,4 +1,5 @@
 import { notFound, redirect } from "next/navigation";
+import { Suspense } from "react";
 import { OrganicShell } from "@/components/organic/organic-shell";
 import { PlanoTurma } from "@/components/organic/plano/plano-turma";
 import { getBnccHabilidadeByCodigo } from "@/lib/ai/bncc";
@@ -8,7 +9,19 @@ import {
 } from "@/lib/db/queries";
 import { auth } from "../../(auth)/auth";
 
-export default async function PlanoPage({
+export default function PlanoPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  return (
+    <Suspense fallback={<div className="min-h-dvh" />}>
+      <PlanoPageContent params={params} />
+    </Suspense>
+  );
+}
+
+async function PlanoPageContent({
   params,
 }: {
   params: Promise<{ id: string }>;

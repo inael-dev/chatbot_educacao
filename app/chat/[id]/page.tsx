@@ -1,4 +1,5 @@
 import { notFound, redirect } from "next/navigation";
+import { Suspense } from "react";
 import { DataStreamProvider } from "@/components/chat/data-stream-provider";
 import { NovaAulaChat } from "@/components/organic/chat/nova-aula-chat";
 import { OrganicShell } from "@/components/organic/organic-shell";
@@ -6,7 +7,19 @@ import { ActiveChatProvider } from "@/hooks/use-active-chat";
 import { getChatById, getTurmaContextForChat } from "@/lib/db/queries";
 import { auth } from "../../(auth)/auth";
 
-export default async function ChatPage({
+export default function ChatPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  return (
+    <Suspense fallback={<div className="min-h-dvh" />}>
+      <ChatPageContent params={params} />
+    </Suspense>
+  );
+}
+
+async function ChatPageContent({
   params,
 }: {
   params: Promise<{ id: string }>;

@@ -1,9 +1,26 @@
 import { notFound } from "next/navigation";
+import { Suspense } from "react";
 import { getAtividadeWithAdaptacoes } from "@/lib/db/queries";
 import { auth } from "../../../(auth)/auth";
 import { AtividadeReview } from "./review-client";
 
-export default async function AtividadePage({
+export default function AtividadePage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  return (
+    <Suspense
+      fallback={
+        <div className="p-6 text-muted-foreground text-sm">Carregando…</div>
+      }
+    >
+      <AtividadeContent params={params} />
+    </Suspense>
+  );
+}
+
+async function AtividadeContent({
   params,
 }: {
   params: Promise<{ id: string }>;

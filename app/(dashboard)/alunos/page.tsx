@@ -1,9 +1,24 @@
+import { Suspense } from "react";
 import { Badge } from "@/components/ui/badge";
 import { getStudentsByTeacherId } from "@/lib/db/queries";
 import { cn, getAvatarColor, getInitials } from "@/lib/utils";
 import { auth } from "../../(auth)/auth";
 
-export default async function AlunosPage() {
+export default function AlunosPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="mx-auto w-full max-w-3xl p-6 text-muted-foreground text-sm">
+          Carregando…
+        </div>
+      }
+    >
+      <AlunosContent />
+    </Suspense>
+  );
+}
+
+async function AlunosContent() {
   const session = await auth();
 
   if (!session?.user) {

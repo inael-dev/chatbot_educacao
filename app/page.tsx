@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { Suspense } from "react";
 import { OrganicShell } from "@/components/organic/organic-shell";
 import { getTurmaHomeData, getTurmasByTeacherId } from "@/lib/db/queries";
 import { auth } from "./(auth)/auth";
@@ -27,7 +28,15 @@ function formatDate(date: Date) {
   }).format(date);
 }
 
-export default async function TurmaPage() {
+export default function TurmaPage() {
+  return (
+    <Suspense fallback={<div className="min-h-dvh" />}>
+      <TurmaPageContent />
+    </Suspense>
+  );
+}
+
+async function TurmaPageContent() {
   const session = await auth();
 
   if (!session?.user) {
