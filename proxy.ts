@@ -13,11 +13,15 @@ export async function proxy(request: NextRequest) {
     return NextResponse.next();
   }
 
-  const token = await getToken({
+  const rawToken = await getToken({
     req: request,
     secret: process.env.AUTH_SECRET,
     secureCookie: !isDevelopmentEnvironment,
   });
+
+  // Tokens from the old guest/email auth (pre-CPF login) carry a
+  // different `type` and stale user ids; treat them as unauthenticated.
+  const token = rawToken?.type === "regular" ? rawToken : null;
 
   const base = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
 
