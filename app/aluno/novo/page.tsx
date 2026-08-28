@@ -1,10 +1,19 @@
 import { redirect } from "next/navigation";
+import { Suspense } from "react";
 import { auth } from "@/app/(auth)/auth";
 import { OrganicShell } from "@/components/organic/organic-shell";
 import { getStudentsByTeacherId } from "@/lib/db/queries";
 import { cadastrarAlunoAction } from "./actions";
 
-export default async function CadastrarAlunoPage() {
+export default function CadastrarAlunoPage() {
+  return (
+    <Suspense fallback={<div className="min-h-dvh" />}>
+      <CadastrarAlunoPageContent />
+    </Suspense>
+  );
+}
+
+async function CadastrarAlunoPageContent() {
   const session = await auth();
   if (!session?.user) {
     redirect("/login");
