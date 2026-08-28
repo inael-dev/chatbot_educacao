@@ -232,12 +232,23 @@ export function TurmaHome({
         >
           <div
             style={{
-              color: "var(--color-text)",
-              fontFamily: "var(--font-heading)",
-              fontSize: 17,
+              alignItems: "center",
+              display: "flex",
+              gap: 10,
             }}
           >
-            Alunos
+            <div
+              style={{
+                color: "var(--color-text)",
+                fontFamily: "var(--font-heading)",
+                fontSize: 17,
+              }}
+            >
+              Alunos
+            </div>
+            <Link className="btn btn-ghost" href="/aluno/novo" style={{ padding: 0 }}>
+              + Adicionar
+            </Link>
           </div>
           <div
             className="seg"

@@ -1,66 +1,77 @@
 "use client";
 
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useActionState, useEffect, useState } from "react";
-
-import { AuthForm } from "@/components/chat/auth-form";
-import { SubmitButton } from "@/components/chat/submit-button";
-import { toast } from "@/components/chat/toast";
+import { OrganicShell } from "@/components/organic/organic-shell";
+import { formatCpf, sanitizeCpf } from "@/lib/cpf";
 import { type LoginActionState, login } from "../actions";
 
-export default function Page() {
+export default function LoginPage() {
   const router = useRouter();
-  const [email, setEmail] = useState("");
-  const [isSuccessful, setIsSuccessful] = useState(false);
-
+  const { update: updateSession } = useSession();
+  const [display, setDisplay] = useState("");
   const [state, formAction] = useActionState<LoginActionState, FormData>(
     login,
     { status: "idle" }
   );
 
-  const { update: updateSession } = useSession();
-
   // biome-ignore lint/correctness/useExhaustiveDependencies: router and updateSession are stable refs
   useEffect(() => {
-    if (state.status === "failed") {
-      toast({ description: "Invalid credentials!", type: "error" });
-    } else if (state.status === "invalid_data") {
-      toast({
-        description: "Failed validating your submission!",
-        type: "error",
-      });
-    } else if (state.status === "success") {
-      setIsSuccessful(true);
+    if (state.status === "success") {
       updateSession();
+      router.push("/");
       router.refresh();
     }
   }, [state.status]);
 
-  const handleSubmit = (formData: FormData) => {
-    setEmail(formData.get("email") as string);
-    formAction(formData);
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const digits = sanitizeCpf(event.target.value).slice(0, 11);
+    setDisplay(formatCpf(digits));
   };
 
   return (
-    <>
-      <h1 className="text-2xl font-semibold tracking-tight">Welcome back</h1>
-      <p className="text-sm text-muted-foreground">
-        Sign in to your account to continue
-      </p>
-      <AuthForm action={handleSubmit} defaultEmail={email}>
-        <SubmitButton isSuccessful={isSuccessful}>Sign in</SubmitButton>
-        <p className="text-center text-[13px] text-muted-foreground">
-          {"No account? "}
-          <Link
-            className="text-foreground underline-offset-4 hover:underline"
-            href="/register"
-          >
-            Sign up
-          </Link>
+    <OrganicShell className="flex min-h-dvh flex-col items-center justify-center p-6">
+      <div className="card elev-md" style={{ maxWidth: 360, padding: 24, width: "100%" }}>
+        <div className="card-kicker">Entrar</div>
+        <h1
+          style={{
+            fontFamily: "var(--font-heading)",
+            fontSize: 24,
+            margin: "4px 0 6px",
+          }}
+        >
+          Seu CPF
+        </h1>
+        <p className="text-muted" style={{ fontSize: 13, marginBottom: 18 }}>
+          Só o CPF, sem senha. Se é a primeira vez, criamos sua conta agora.
+          Se já usou antes, seus alunos e turmas voltam do jeito que estavam.
         </p>
-      </AuthForm>
-    </>
+        <form action={formAction} className="flex flex-col gap-4">
+          <div className="field">
+            <label htmlFor="cpf">CPF</label>
+            <input
+              autoComplete="off"
+              autoFocus
+              className="input"
+              id="cpf"
+              inputMode="numeric"
+              name="cpf"
+              onChange={handleChange}
+              placeholder="000.000.000-00"
+              value={display}
+            />
+          </div>
+          {state.status === "invalid_cpf" && (
+            <p style={{ color: "var(--color-danger)", fontSize: 12 }}>
+              Esse CPF não parece válido. Confira os números e tente de novo.
+            </p>
+          )}
+          <button className="btn btn-primary btn-block" type="submit">
+            Entrar
+          </button>
+        </form>
+      </div>
+    </OrganicShell>
   );
 }

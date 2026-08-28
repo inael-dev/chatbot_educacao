@@ -3,35 +3,34 @@ import { expect, test } from "@playwright/test";
 test.describe("Authentication Pages", () => {
   test("login page renders correctly", async ({ page }) => {
     await page.goto("/login");
-    await expect(
-      page.getByRole("heading", { name: "Welcome back" })
-    ).toBeVisible();
-    await expect(page.getByLabel("Email")).toBeVisible();
-    await expect(page.getByLabel("Password")).toBeVisible();
-    await expect(page.getByRole("button", { name: "Sign in" })).toBeVisible();
-    await expect(page.getByRole("link", { name: "Sign up" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Seu CPF" })).toBeVisible();
+    await expect(page.getByLabel("CPF")).toBeVisible();
+    await expect(page.getByRole("button", { name: "Entrar" })).toBeVisible();
   });
 
-  test("register page renders correctly", async ({ page }) => {
-    await page.goto("/register");
-    await expect(
-      page.getByRole("heading", { name: "Create account" })
-    ).toBeVisible();
-    await expect(page.getByLabel("Email")).toBeVisible();
-    await expect(page.getByLabel("Password")).toBeVisible();
-    await expect(page.getByRole("button", { name: "Sign up" })).toBeVisible();
-    await expect(page.getByRole("link", { name: "Sign in" })).toBeVisible();
-  });
-
-  test("can navigate from login to register", async ({ page }) => {
+  test("rejects an invalid CPF", async ({ page }) => {
     await page.goto("/login");
-    await page.getByRole("link", { name: "Sign up" }).click();
-    await expect(page).toHaveURL("/register");
+    await page.getByLabel("CPF").fill("111.111.111-11");
+    await page.getByRole("button", { name: "Entrar" }).click();
+    await expect(
+      page.getByText("Esse CPF não parece válido.", { exact: false })
+    ).toBeVisible();
   });
 
-  test("can navigate from register to login", async ({ page }) => {
-    await page.goto("/register");
-    await page.getByRole("link", { name: "Sign in" }).click();
-    await expect(page).toHaveURL("/login");
+  test("logs in with a new CPF and resumes the same account on a second login", async ({
+    page,
+  }) => {
+    const cpf = "52998224725"; // known-valid CPF (public check-digit example)
+
+    await page.goto("/login");
+    await page.getByLabel("CPF").fill(cpf);
+    await page.getByRole("button", { name: "Entrar" }).click();
+    await expect(page).toHaveURL("/");
+
+    await page.context().clearCookies();
+    await page.goto("/login");
+    await page.getByLabel("CPF").fill(cpf);
+    await page.getByRole("button", { name: "Entrar" }).click();
+    await expect(page).toHaveURL("/");
   });
 });

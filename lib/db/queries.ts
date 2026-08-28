@@ -17,7 +17,6 @@ import postgres from "postgres";
 import type { ArtifactKind } from "@/components/chat/artifact";
 import type { VisibilityType } from "@/components/chat/visibility-selector";
 import { ChatbotError } from "../errors";
-import { generateUUID } from "../utils";
 import {
   type Atividade,
   type AtividadeAdaptada,
@@ -56,40 +55,32 @@ import {
   user,
   vote,
 } from "./schema";
-import { generateHashedPassword } from "./utils";
 
 const client = postgres(process.env.POSTGRES_URL ?? "");
 const db = drizzle(client);
 
-export async function getUser(email: string): Promise<User[]> {
+// Sole login path: a teacher's CPF doubles as their identifier. First CPF
+// seen creates the account; every login after that resumes it — no password,
+// no "reset" from a lost guest cookie.
+export async function getOrCreateUserByCpf(cpf: string): Promise<User> {
   try {
-    return await db.select().from(user).where(eq(user.email, email));
-  } catch (error) {
-    throw new ChatbotError("bad_request:database", { cause: error });
-  }
-}
+    const [existing] = await db.select().from(user).where(eq(user.cpf, cpf));
+    if (existing) {
+      return existing;
+    }
 
-export async function createUser(email: string, password: string) {
-  const hashedPassword = generateHashedPassword(password);
+    const [created] = await db
+      .insert(user)
+      .values({ cpf })
+      .onConflictDoNothing({ target: user.cpf })
+      .returning();
+    if (created) {
+      return created;
+    }
 
-  try {
-    return await db.insert(user).values({ email, password: hashedPassword });
-  } catch (error) {
-    throw new ChatbotError("bad_request:database", {
-      cause: error,
-    });
-  }
-}
-
-export async function createGuestUser() {
-  const email = `guest-${Date.now()}`;
-  const password = generateHashedPassword(generateUUID());
-
-  try {
-    return await db.insert(user).values({ email, password }).returning({
-      email: user.email,
-      id: user.id,
-    });
+    // Lost a race against a concurrent first login with the same CPF.
+    const [racedIn] = await db.select().from(user).where(eq(user.cpf, cpf));
+    return racedIn;
   } catch (error) {
     throw new ChatbotError("bad_request:database", { cause: error });
   }
@@ -654,6 +645,52 @@ export async function getStudentsByTeacherId({
       conditions: conditions.filter((c) => c.studentId === s.id),
       interests: interests.filter((i) => i.studentId === s.id),
     }));
+  } catch (error) {
+    throw new ChatbotError("bad_request:database", { cause: error });
+  }
+}
+
+// Manual student registration (there is no other production path to create
+// a `student` row — the AI tools only ever look up existing students).
+export async function createStudentWithDetails({
+  teacherId,
+  name,
+  preferredName,
+  conditions,
+  interests,
+}: {
+  teacherId: string;
+  name: string;
+  preferredName?: string;
+  conditions: string[];
+  interests: string[];
+}): Promise<Student> {
+  try {
+    const [created] = await db
+      .insert(student)
+      .values({ name, preferredName, teacherId })
+      .returning();
+
+    await Promise.all([
+      conditions.length > 0
+        ? db.insert(studentCondition).values(
+            conditions.map((condition) => ({
+              condition,
+              studentId: created.id,
+            }))
+          )
+        : Promise.resolve(),
+      interests.length > 0
+        ? db.insert(studentInterest).values(
+            interests.map((interest) => ({
+              interest,
+              studentId: created.id,
+            }))
+          )
+        : Promise.resolve(),
+    ]);
+
+    return created;
   } catch (error) {
     throw new ChatbotError("bad_request:database", { cause: error });
   }

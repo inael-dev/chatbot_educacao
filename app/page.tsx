@@ -1,9 +1,28 @@
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import { OrganicShell } from "@/components/organic/organic-shell";
-import { getTurmaHomeData, getTurmasByTeacherId } from "@/lib/db/queries";
+import {
+  getStudentsByTeacherId,
+  getTurmaHomeData,
+  getTurmasByTeacherId,
+} from "@/lib/db/queries";
 import { auth } from "./(auth)/auth";
 import { TurmaHome } from "./turma-home";
+
+function NoStudentsYet() {
+  return (
+    <OrganicShell className="flex min-h-dvh flex-col items-center justify-center gap-3 p-8 text-center">
+      <h1>Nenhum aluno cadastrado ainda</h1>
+      <p className="text-muted max-w-xs">
+        Antes de montar uma aula, cadastre quem são seus alunos — a IA usa
+        isso pra adaptar de verdade.
+      </p>
+      <a className="btn btn-primary" href="/aluno/novo">
+        Cadastrar aluno
+      </a>
+    </OrganicShell>
+  );
+}
 
 function NoTurmaYet() {
   return (
@@ -15,6 +34,9 @@ function NoTurmaYet() {
       </p>
       <a className="btn btn-primary" href="/nova-aula">
         Começar no chat
+      </a>
+      <a className="btn btn-secondary" href="/aluno/novo">
+        Cadastrar outro aluno
       </a>
     </OrganicShell>
   );
@@ -41,6 +63,12 @@ async function TurmaPageContent() {
 
   if (!session?.user) {
     redirect("/login");
+  }
+
+  const students = await getStudentsByTeacherId({ teacherId: session.user.id });
+
+  if (students.length === 0) {
+    return <NoStudentsYet />;
   }
 
   const turmas = await getTurmasByTeacherId({ teacherId: session.user.id });

@@ -13,8 +13,12 @@ import {
 } from "drizzle-orm/pg-core";
 
 export const user = pgTable("User", {
+  // Sole login credential (11 digits, no punctuation) — replaced
+  // email/password auth. Nullable only for legacy rows seeded before this
+  // migration; every user created from now on has one.
+  cpf: varchar("cpf", { length: 11 }).unique(),
   createdAt: timestamp("createdAt").notNull().defaultNow(),
-  email: varchar("email", { length: 64 }).notNull(),
+  email: varchar("email", { length: 64 }),
   emailVerified: boolean("emailVerified").notNull().default(false),
   id: uuid("id").primaryKey().notNull().defaultRandom(),
   image: text("image"),
