@@ -9,7 +9,7 @@ import {
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useState } from "react";
-import { toast } from "sonner";
+import { TabBar } from "@/components/organic/tab-bar";
 import type { Atividade, AtividadeAdaptada, Student } from "@/lib/db/schema";
 import { getInitials } from "@/lib/utils";
 
@@ -73,10 +73,6 @@ export function PlanoTurma({
   const handleBack = useCallback(() => {
     router.back();
   }, [router]);
-
-  const handleExportarClick = useCallback(() => {
-    toast.info("Exportar PDF da turma ainda não disponível.");
-  }, []);
 
   const handleAdaptarClick = useCallback(() => {
     setIsPickerOpen(true);
@@ -161,6 +157,11 @@ export function PlanoTurma({
           <div
             style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 8 }}
           >
+            {atividade.diaAplicacao ? (
+              <span className="tag tag-accent-2">
+                {atividade.diaAplicacao}
+              </span>
+            ) : null}
             {content.habilidades[0] ? (
               <span className="tag tag-accent">
                 BNCC {content.habilidades[0]}
@@ -342,15 +343,21 @@ export function PlanoTurma({
       </div>
 
       <div style={{ display: "flex", gap: 9, padding: "11px 16px 18px" }}>
-        <button
+        <Link
           aria-label="Exportar PDF"
           className="btn btn-secondary"
-          onClick={handleExportarClick}
-          style={{ flex: "none", height: 48, padding: 0, width: 48 }}
-          type="button"
+          href={`/plano/${atividade.id}/imprimir`}
+          style={{
+            alignItems: "center",
+            display: "flex",
+            flex: "none",
+            height: 48,
+            justifyContent: "center",
+            width: 48,
+          }}
         >
           <DownloadIcon size={19} strokeWidth={2.75} />
-        </button>
+        </Link>
         <button
           className="btn btn-primary"
           onClick={handleAdaptarClick}
@@ -369,6 +376,8 @@ export function PlanoTurma({
           <ArrowRightIcon size={16} strokeWidth={2.75} />
         </button>
       </div>
+
+      <TabBar />
 
       {isPickerOpen ? (
         <div className="dialog-backdrop">

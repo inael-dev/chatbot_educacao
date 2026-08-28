@@ -244,6 +244,9 @@ export function AtividadesList({ grupos }: { grupos: Grupos }) {
                 }}
               >
                 {grupo.turmaName}
+                {grupo.atividade.diaAplicacao
+                  ? ` · ${grupo.atividade.diaAplicacao}`
+                  : ""}
               </div>
 
               {grupo.adaptacoes.length === 0 ? (

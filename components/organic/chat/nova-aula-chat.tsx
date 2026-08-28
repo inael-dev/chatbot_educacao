@@ -2,8 +2,9 @@
 
 import {
   ArrowLeftIcon,
+  ArrowRightIcon,
   ArrowUpIcon,
-  PaperclipIcon,
+  FileTextIcon,
   PlusIcon,
   UploadIcon,
   XIcon,
@@ -11,6 +12,7 @@ import {
 import Link from "next/link";
 import { type FormEvent, useCallback, useRef, useState } from "react";
 import { toast } from "sonner";
+import { TabBar } from "@/components/organic/tab-bar";
 import { useActiveChat } from "@/hooks/use-active-chat";
 import type { Attachment } from "@/lib/types";
 import { MessageBubble } from "./message-bubble";
@@ -209,6 +211,23 @@ export function NovaAulaChat({
                 <div className="choice-card-body">
                   Conte a atividade e a IA monta o plano.
                 </div>
+                <div className="choice-card-action">
+                  <span className="choice-card-action-label">Começar</span>
+                  <div
+                    className="av"
+                    style={{
+                      background: "var(--color-accent-2-500)",
+                      height: 26,
+                      width: 26,
+                    }}
+                  >
+                    <ArrowRightIcon
+                      color="var(--color-bg)"
+                      size={13}
+                      strokeWidth={3}
+                    />
+                  </div>
+                </div>
               </button>
               <button
                 className="choice-card choice-card-accent"
@@ -236,6 +255,28 @@ export function NovaAulaChat({
                 >
                   Foto ou PDF — a IA extrai e organiza.
                 </div>
+                <div className="choice-card-action">
+                  <span
+                    className="choice-card-action-label"
+                    style={{ color: "var(--color-accent-800)" }}
+                  >
+                    Anexar
+                  </span>
+                  <div
+                    className="av"
+                    style={{
+                      background: "var(--color-accent)",
+                      height: 26,
+                      width: 26,
+                    }}
+                  >
+                    <ArrowRightIcon
+                      color="var(--color-bg)"
+                      size={13}
+                      strokeWidth={3}
+                    />
+                  </div>
+                </div>
               </button>
             </div>
           </>
@@ -254,92 +295,92 @@ export function NovaAulaChat({
         onSubmit={handleSubmit}
         style={{
           borderTop: "1px solid var(--color-divider)",
-          display: "flex",
-          flexDirection: "column",
-          gap: 8,
           padding: "10px 14px 16px",
         }}
       >
-        {(attachments.length > 0 || isUploading) && (
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-            {attachments.map((attachment) => (
-              <span
-                className="tag tag-neutral"
-                key={attachment.url}
-                style={{ alignItems: "center", display: "inline-flex", gap: 5 }}
-              >
-                {attachment.name}
-                <button
-                  aria-label="Remover anexo"
-                  data-url={attachment.url}
-                  onClick={handleRemoveAttachmentClick}
-                  style={{
-                    alignItems: "center",
-                    background: "none",
-                    border: "none",
-                    cursor: "pointer",
-                    display: "flex",
-                    padding: 0,
-                  }}
-                  type="button"
-                >
-                  <XIcon size={12} />
-                </button>
-              </span>
-            ))}
-            {isUploading ? (
-              <span className="tag tag-neutral">Enviando…</span>
-            ) : null}
-          </div>
-        )}
+        <div className="composer">
+          {(attachments.length > 0 || isUploading) && (
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+              {attachments.map((attachment) => {
+                const isImage = attachment.contentType.startsWith("image/");
+                return (
+                  <div className="attachment-thumb" key={attachment.url}>
+                    <div className="attachment-thumb-media">
+                      {isImage ? (
+                        <img alt={attachment.name} src={attachment.url} />
+                      ) : (
+                        <FileTextIcon
+                          color="var(--color-muted)"
+                          size={22}
+                          strokeWidth={2}
+                        />
+                      )}
+                    </div>
+                    <button
+                      aria-label="Remover anexo"
+                      className="attachment-remove"
+                      data-url={attachment.url}
+                      onClick={handleRemoveAttachmentClick}
+                      type="button"
+                    >
+                      <XIcon size={11} strokeWidth={3} />
+                    </button>
+                  </div>
+                );
+              })}
+              {isUploading ? (
+                <span className="tag tag-neutral">Enviando…</span>
+              ) : null}
+            </div>
+          )}
 
-        <div style={{ alignItems: "center", display: "flex", gap: 9 }}>
-          <input
-            accept="image/jpeg,image/png,application/pdf"
-            className="sr-only"
-            onChange={handleFileChange}
-            ref={fileInputRef}
-            type="file"
-          />
-          <button
-            aria-label="Anexar arquivo"
-            onClick={handleAnexarClick}
-            style={{
-              background: "none",
-              border: "none",
-              color: "var(--color-muted)",
-              cursor: "pointer",
-              display: "flex",
-              padding: 0,
-            }}
-            type="button"
-          >
-            <PaperclipIcon size={22} strokeWidth={2.5} />
-          </button>
-          <input
-            className="input input-pill"
-            onChange={handleInputChange}
-            placeholder="Mensagem…"
-            ref={textInputRef}
-            value={input}
-          />
-          <button
-            aria-label="Enviar"
-            className="av"
-            disabled={isBusy || (!input.trim() && attachments.length === 0)}
-            style={{
-              background: "var(--color-accent)",
-              border: "none",
-              cursor: "pointer",
-              height: 40,
-              width: 40,
-            }}
-            type="submit"
-          >
-            <ArrowUpIcon color="var(--color-bg)" size={18} strokeWidth={2.75} />
-          </button>
+          <div style={{ alignItems: "center", display: "flex", gap: 8 }}>
+            <input
+              accept="image/jpeg,image/png,application/pdf"
+              className="sr-only"
+              onChange={handleFileChange}
+              ref={fileInputRef}
+              type="file"
+            />
+            <button
+              aria-label="Anexar arquivo"
+              className="composer-icon-btn"
+              onClick={handleAnexarClick}
+              type="button"
+            >
+              <PlusIcon size={19} strokeWidth={2.5} />
+            </button>
+            <input
+              className="input composer-input"
+              onChange={handleInputChange}
+              placeholder="Mensagem…"
+              ref={textInputRef}
+              value={input}
+            />
+            <button
+              aria-label="Enviar"
+              className="av"
+              disabled={isBusy || (!input.trim() && attachments.length === 0)}
+              style={{
+                background: "var(--color-accent)",
+                border: "none",
+                cursor: "pointer",
+                height: 38,
+                width: 38,
+              }}
+              type="submit"
+            >
+              <ArrowUpIcon
+                color="var(--color-bg)"
+                size={17}
+                strokeWidth={2.75}
+              />
+            </button>
+          </div>
         </div>
       </form>
+
+      <TabBar />
     </>
   );
 }

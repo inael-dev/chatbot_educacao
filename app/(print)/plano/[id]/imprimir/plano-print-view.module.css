@@ -1,0 +1,149 @@
+/*
+  Formal planning-document print (turma-level plano, not the per-student
+  worksheet at app/(print)/atividades/.../print-view.module.css — that one is
+  a fill-in-the-blank activity sheet, this one is a plain pedagogical
+  document for the teacher/coordenação to keep/print). Paper tokens fixed on
+  purpose (PLANEJAMENTO.md §4.5) so it looks like paper regardless of the
+  app's own theme.
+*/
+.pageShell {
+  --paper: #ffffff;
+  --ink: #201e1d;
+  --ink-soft: #57524a;
+  --rule: #d9d4c8;
+
+  width: min(720px, 92vw);
+  border-radius: 2px;
+  box-shadow: 0 18px 40px -18px rgba(0, 0, 0, 0.35);
+}
+
+.page {
+  min-height: 297mm;
+  padding: 28px;
+  font-family: "Segoe UI", Verdana, sans-serif;
+  color: var(--ink);
+  background: var(--paper);
+}
+
+.headerBox {
+  padding-bottom: 10px;
+  margin-bottom: 18px;
+  font-size: 0.7rem;
+  line-height: 1.9;
+  border-bottom: 1px solid var(--rule);
+}
+
+.headerRow {
+  display: flex;
+  gap: 16px;
+}
+
+.field {
+  flex: 1;
+}
+
+.field b {
+  letter-spacing: 0.04em;
+}
+
+.fill {
+  color: var(--ink-soft);
+}
+
+.blank {
+  display: inline-block;
+  min-width: 40%;
+  height: 1em;
+  border-bottom: 1px solid var(--ink-soft);
+}
+
+.titleBand {
+  margin-bottom: 18px;
+}
+
+.eyebrow {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--ink-soft);
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+}
+
+.title {
+  margin: 0.25rem 0 0.5rem;
+  font-size: clamp(1.3rem, 3.4vw, 1.7rem);
+}
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.tag {
+  padding: 2px 9px;
+  font-size: 0.65rem;
+  color: var(--ink-soft);
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+}
+
+.section {
+  margin-bottom: 16px;
+}
+
+.sectionLabel {
+  margin: 0 0 4px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--ink-soft);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.sectionText {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.55;
+}
+
+.metaRow {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 16px;
+}
+
+.metaCol {
+  flex: 1;
+}
+
+.momentos {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.momentoTitle {
+  margin: 0 0 3px;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.momentoText {
+  margin: 0;
+  font-size: 0.87rem;
+  line-height: 1.55;
+  color: var(--ink);
+}
+
+@media print {
+  .pageShell {
+    width: 210mm;
+    box-shadow: none;
+  }
+
+  @page {
+    size: A4;
+    margin: 16mm;
+  }
+}

@@ -32,6 +32,7 @@ import { lookupBnccHabilidade } from "@/lib/ai/tools/lookup-bncc-habilidade";
 import { lookupStudent } from "@/lib/ai/tools/lookup-student";
 import { requestSuggestions } from "@/lib/ai/tools/request-suggestions";
 import { saveAtividade } from "@/lib/ai/tools/save-atividade";
+import { savePlanejamentoSemanal } from "@/lib/ai/tools/save-planejamento-semanal";
 import { updateAdaptacao } from "@/lib/ai/tools/update-adaptacao";
 import { updateDocument } from "@/lib/ai/tools/update-document";
 import { isProductionEnvironment } from "@/lib/constants";
@@ -41,10 +42,12 @@ import {
   getChatById,
   getMessageCountByUserId,
   getMessagesByChatId,
+  getStudentForProfile,
   saveChat,
   saveMessages,
   updateChatTitleById,
   updateMessage,
+  upsertConselhoObservation,
 } from "@/lib/db/queries";
 import type { DBMessage } from "@/lib/db/schema";
 import { ChatbotError } from "@/lib/errors";
@@ -138,6 +141,19 @@ export async function POST(request: Request) {
       });
       titlePromise = generateTitleFromUserMessage({ message });
     }
+
+    // Set only for a conselho comportamental chat (PLANEJAMENTO.md §4.3),
+    // pre-created with `studentId` by findOrCreateConselhoChat before the
+    // professor ever sends a message here — so this is never true for a
+    // brand-new chat created in the branch above, only for one opened via
+    // "Conversar sobre {Nome}". Drives the specialized system prompt, a
+    // trimmed tool set, and the auto-logged studentObservation in onEnd.
+    const conselhoStudent = chat?.studentId
+      ? await getStudentForProfile({
+          studentId: chat.studentId,
+          teacherId: session.user.id,
+        })
+      : null;
 
     let uiMessages: ChatMessage[];
 
@@ -264,19 +280,31 @@ export async function POST(request: Request) {
           activeTools:
             isReasoningModel && !supportsTools
               ? []
-              : [
-                  "getWeather",
-                  "createDocument",
-                  "editDocument",
-                  "updateDocument",
-                  "requestSuggestions",
-                  "listStudents",
-                  "lookupStudent",
-                  "lookupBnccHabilidade",
-                  "saveAtividade",
-                  "updateAdaptacao",
-                ],
-          instructions: systemPrompt({ requestHints, supportsTools }),
+              : conselhoStudent
+                ? // Conselho comportamental (PLANEJAMENTO.md §4.3): only
+                  // needs the student's own context, never activity/plano
+                  // tools — this isn't a lesson-planning conversation.
+                  ["lookupStudent"]
+                : [
+                    "getWeather",
+                    "createDocument",
+                    "editDocument",
+                    "updateDocument",
+                    "requestSuggestions",
+                    "listStudents",
+                    "lookupStudent",
+                    "lookupBnccHabilidade",
+                    "saveAtividade",
+                    "savePlanejamentoSemanal",
+                    "updateAdaptacao",
+                  ],
+          instructions: systemPrompt({
+            conselhoStudentName: conselhoStudent
+              ? conselhoStudent.preferredName || conselhoStudent.name
+              : undefined,
+            requestHints,
+            supportsTools,
+          }),
           messages: modelMessages,
           model: getLanguageModel(chatModel),
           onAbort() {
@@ -327,6 +355,10 @@ export async function POST(request: Request) {
               session,
             }),
             saveAtividade: saveAtividade({ chatId: id, session }),
+            savePlanejamentoSemanal: savePlanejamentoSemanal({
+              chatId: id,
+              session,
+            }),
             updateAdaptacao: updateAdaptacao({ session }),
             updateDocument: updateDocument({
               dataStream,
@@ -394,6 +426,34 @@ export async function POST(request: Request) {
               role: currentMessage.role,
             })),
           });
+        }
+
+        // Conselho comportamental (PLANEJAMENTO.md §4.3): auto-log the
+        // conversation as a studentObservation, server-side, rather than
+        // relying on the model to remember to call a save tool — Fase 2A's
+        // real testing showed that pattern isn't reliable (see fases.md
+        // § Fase 2A.2). Upserted per chat, so a multi-turn conversation
+        // ends up as one growing entry, not one row per assistant reply.
+        if (conselhoStudent) {
+          const lastAssistantMessage = finishedMessages
+            .filter((m) => m.role === "assistant")
+            .at(-1);
+          const assistantText = lastAssistantMessage?.parts
+            ?.filter(
+              (part): part is { type: "text"; text: string } =>
+                part.type === "text" && part.text.trim().length > 0
+            )
+            .map((part) => part.text)
+            .join("\n");
+
+          if (assistantText) {
+            await upsertConselhoObservation({
+              chatId: id,
+              observation: assistantText,
+              studentId: conselhoStudent.id,
+              teacherId: session.user.id,
+            });
+          }
         }
       },
       onError: () => "Oops, an error occurred!",

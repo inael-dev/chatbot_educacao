@@ -2,12 +2,9 @@ import { tool } from "ai";
 import type { Session } from "next-auth";
 import { z } from "zod";
 import {
-  addStudentsToTurma,
   createAtividade,
   createAtividadesAdaptadas,
-  createTurma,
-  getStudentsByTeacherId,
-  getTurmasByTeacherId,
+  resolveActiveTurma,
 } from "@/lib/db/queries";
 
 type SaveAtividadeProps = {
@@ -46,26 +43,10 @@ export const saveAtividade = ({ session, chatId }: SaveAtividadeProps) =>
       sourceFileUrl,
       adaptacoes,
     }) => {
-      const turmas = await getTurmasByTeacherId({
+      const activeTurma = await resolveActiveTurma({
         teacherId: session.user.id,
+        turmaNome,
       });
-      let [activeTurma] = turmas;
-
-      if (!activeTurma) {
-        const [created] = await createTurma({
-          name: turmaNome || "Minha turma",
-          teacherId: session.user.id,
-        });
-        activeTurma = created;
-
-        const students = await getStudentsByTeacherId({
-          teacherId: session.user.id,
-        });
-        await addStudentsToTurma({
-          studentIds: students.map((s) => s.id),
-          turmaId: activeTurma.id,
-        });
-      }
 
       const createdAtividade = await createAtividade({
         content: plano,

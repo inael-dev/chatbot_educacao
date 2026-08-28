@@ -1,11 +1,13 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { auth } from "@/app/(auth)/auth";
 import {
   createAeeNote,
   createObservacao,
   deleteObservacao,
+  findOrCreateConselhoChat,
   getStudentForProfile,
 } from "@/lib/db/queries";
 import type { StudentAeeNote, StudentObservation } from "@/lib/db/schema";
@@ -60,6 +62,29 @@ export async function removerObservacaoAction({
   await assertOwnership(studentId);
   await deleteObservacao({ id });
   revalidatePath(`/aluno/${studentId}`);
+}
+
+export async function startConselhoChatAction({
+  studentId,
+}: {
+  studentId: string;
+}) {
+  const session = await assertOwnership(studentId);
+  const student = await getStudentForProfile({
+    studentId,
+    teacherId: session.user.id,
+  });
+  if (!student) {
+    throw new Error("Unauthorized");
+  }
+
+  const chat = await findOrCreateConselhoChat({
+    studentId,
+    studentName: student.preferredName || student.name,
+    teacherId: session.user.id,
+  });
+
+  redirect(`/chat/${chat.id}`);
 }
 
 export async function responderAeeAction({

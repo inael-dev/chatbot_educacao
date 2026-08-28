@@ -93,7 +93,7 @@ export const Greeting = ({ onStartTurma, onUploadPlano }: GreetingProps) => {
         <div className="grid grid-cols-2 gap-3">
           <Link
             className="flex flex-col items-start gap-2 rounded-2xl border border-border bg-card p-4 text-left transition-colors hover:bg-accent"
-            href="/alunos"
+            href="/"
           >
             <UserIcon className="size-5 text-muted-foreground" />
             <span className="font-medium text-sm">Planejamento individual</span>

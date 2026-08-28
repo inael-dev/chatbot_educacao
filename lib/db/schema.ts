@@ -32,6 +32,12 @@ export type User = InferSelectModel<typeof user>;
 export const chat = pgTable("Chat", {
   createdAt: timestamp("createdAt").notNull(),
   id: uuid("id").primaryKey().notNull().defaultRandom(),
+  // Set only for a "conselho comportamental" chat (PLANEJAMENTO.md §4.3) — a
+  // conversation scoped to one student, separate from turma/atividade
+  // planning chats. Null for every other chat. Drives which system prompt
+  // and tool set the chat route uses, and which student an auto-logged
+  // studentObservation (see below) belongs to.
+  studentId: uuid("studentId").references(() => student.id),
   title: text("title").notNull(),
   userId: uuid("userId")
     .notNull()
@@ -252,15 +258,24 @@ export type StudentGoal = InferSelectModel<typeof studentGoal>;
 
 // `origem`/`tipo` and the optional `atividadeId` link back to the design
 // handoff's recommended history model (PLANEJAMENTO.md / tela 8): entries
-// either come from a post-atividade feedback prompt ("feedback", linked to
-// the atividade that prompted it) or a standalone note the teacher adds
-// ("avulso"). `tipo` drives the timeline dot color (positivo/barreira/neutro).
+// come from a post-atividade feedback prompt ("feedback", linked to the
+// atividade that prompted it), a standalone note the teacher adds
+// ("avulso"), or a conselho comportamental chat ("conselho", linked to the
+// chat that produced it via `chatId` — PLANEJAMENTO.md §4.3). `tipo` drives
+// the timeline dot color (positivo/barreira/neutro); "conselho" entries
+// default to neutro since giving advice isn't itself positive/negative
+// signal about the student.
 export const studentObservation = pgTable("StudentObservation", {
   atividadeId: uuid("atividadeId").references(() => atividade.id),
+  // Set only for origem "conselho" — one observation per chat, upserted as
+  // the conversation continues (mirrors the "each call replaces the
+  // previous version" pattern already used by updateAdaptacao) rather than
+  // one new row per assistant message, which would flood the timeline.
+  chatId: uuid("chatId").references(() => chat.id),
   createdAt: timestamp("createdAt").notNull().defaultNow(),
   id: uuid("id").primaryKey().notNull().defaultRandom(),
   observation: text("observation").notNull(),
-  origem: varchar("origem", { enum: ["feedback", "avulso"] })
+  origem: varchar("origem", { enum: ["feedback", "avulso", "conselho"] })
     .notNull()
     .default("avulso"),
   studentId: uuid("studentId")
@@ -339,6 +354,32 @@ export const turmaStudent = pgTable(
 
 export type TurmaStudent = InferSelectModel<typeof turmaStudent>;
 
+// Groups the daily `atividade` rows created from a single weekly-planning
+// input (PLANEJAMENTO.md §4.2 — "Planejamento semanal"). The professor
+// submits the week's plan once (often something they've already planned
+// themselves, describing it or attaching a file); the AI decomposes it into
+// one `atividade` per day. `objetivoGeral` is optional because not every
+// week has one shared thread beyond its individual days. Per-student
+// adaptation timing is deliberately NOT modeled here — each `atividade`
+// created from this reuses the exact same adaptation flow as a standalone
+// one (immediately, via `saveAtividade`-style `adaptacoes`, or later via
+// `/plano/:id`'s "Adaptar por aluno") rather than a week-level switch.
+export const planejamentoSemanal = pgTable("PlanejamentoSemanal", {
+  createdAt: timestamp("createdAt").notNull().defaultNow(),
+  id: uuid("id").primaryKey().notNull().defaultRandom(),
+  objetivoGeral: text("objetivoGeral"),
+  sourceChatId: uuid("sourceChatId").references(() => chat.id),
+  teacherId: uuid("teacherId")
+    .notNull()
+    .references(() => user.id),
+  turmaId: uuid("turmaId")
+    .notNull()
+    .references(() => turma.id),
+  updatedAt: timestamp("updatedAt").notNull().defaultNow(),
+});
+
+export type PlanejamentoSemanal = InferSelectModel<typeof planejamentoSemanal>;
+
 // Structured lesson-plan body, shared by `atividade.content` and
 // `atividadeAdaptada.content` so the review screen can diff them
 // momento-by-momento instead of comparing opaque text blobs. Modeled on the
@@ -364,8 +405,15 @@ export type AtividadeContent = {
 export const atividade = pgTable("Atividade", {
   content: json("content").notNull().$type<AtividadeContent>(),
   createdAt: timestamp("createdAt").notNull().defaultNow(),
+  // Free text on purpose (e.g. "Segunda-feira" or "22/09") — a weekday label
+  // or a real date, whichever the professor's own plan already used; not
+  // every planejamentoSemanal comes with exact calendar dates attached.
+  diaAplicacao: varchar("diaAplicacao", { length: 32 }),
   id: uuid("id").primaryKey().notNull().defaultRandom(),
   objective: text("objective").notNull(),
+  planejamentoSemanalId: uuid("planejamentoSemanalId").references(
+    () => planejamentoSemanal.id
+  ),
   sourceChatId: uuid("sourceChatId").references(() => chat.id),
   sourceFileUrl: text("sourceFileUrl"),
   status: varchar("status", { enum: ["draft", "finalizada"] })

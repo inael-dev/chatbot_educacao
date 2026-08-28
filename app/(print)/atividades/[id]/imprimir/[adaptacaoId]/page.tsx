@@ -21,7 +21,7 @@ async function ImprimirAdaptacaoPageContent({
 }: {
   params: Promise<{ id: string; adaptacaoId: string }>;
 }) {
-  const { id, adaptacaoId } = await params;
+  const { adaptacaoId } = await params;
   const session = await auth();
 
   if (!session?.user) {
@@ -36,7 +36,7 @@ async function ImprimirAdaptacaoPageContent({
 
   return (
     <PrintView
-      backHref={`/atividades/${id}`}
+      backHref="/atividades"
       content={result.adaptacao.content}
       habilidade={result.adaptacao.content.habilidades[0] ?? null}
       schoolName={result.schoolName}

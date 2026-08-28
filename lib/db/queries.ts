@@ -29,6 +29,8 @@ import {
   type DBMessage,
   document,
   message,
+  type PlanejamentoSemanal,
+  planejamentoSemanal,
   type Student,
   type StudentAeeNote,
   type StudentCondition,
@@ -684,41 +686,76 @@ export async function getStudentAdaptacaoContext({
   }
 }
 
+// Recent observations + AEE notes were added here (not just fetched
+// separately by the profile screen) so `lookupStudent` — the tool the AI
+// already calls before adapting or advising on a student — carries them
+// automatically. Without this the conselho comportamental flow (§4.3) would
+// give advice blind to what already happened with that student. Capped at 8
+// observations (most recent first) so the prompt stays a manageable size;
+// AEE notes are usually few enough not to need a cap.
+const RECENT_OBSERVATIONS_LIMIT = 8;
+
 export async function getStudentFullContext({
   studentId,
 }: {
   studentId: string;
 }) {
   try {
-    const [[profile], goals, learningPreferences, sensitivities, [aiMemory]] =
-      await Promise.all([
-        db
-          .select()
-          .from(studentProfile)
-          .where(eq(studentProfile.studentId, studentId)),
-        db
-          .select()
-          .from(studentGoal)
-          .where(eq(studentGoal.studentId, studentId)),
-        db
-          .select()
-          .from(studentLearningPreference)
-          .where(eq(studentLearningPreference.studentId, studentId)),
-        db
-          .select()
-          .from(studentSensitivity)
-          .where(eq(studentSensitivity.studentId, studentId)),
-        db
-          .select()
-          .from(studentAiMemory)
-          .where(eq(studentAiMemory.studentId, studentId)),
-      ]);
+    const [
+      [profile],
+      goals,
+      learningPreferences,
+      sensitivities,
+      [aiMemory],
+      recentObservations,
+      aeeNotes,
+    ] = await Promise.all([
+      db
+        .select()
+        .from(studentProfile)
+        .where(eq(studentProfile.studentId, studentId)),
+      db.select().from(studentGoal).where(eq(studentGoal.studentId, studentId)),
+      db
+        .select()
+        .from(studentLearningPreference)
+        .where(eq(studentLearningPreference.studentId, studentId)),
+      db
+        .select()
+        .from(studentSensitivity)
+        .where(eq(studentSensitivity.studentId, studentId)),
+      db
+        .select()
+        .from(studentAiMemory)
+        .where(eq(studentAiMemory.studentId, studentId)),
+      db
+        .select()
+        .from(studentObservation)
+        .where(eq(studentObservation.studentId, studentId))
+        .orderBy(desc(studentObservation.createdAt))
+        .limit(RECENT_OBSERVATIONS_LIMIT),
+      db
+        .select()
+        .from(studentAeeNote)
+        .where(eq(studentAeeNote.studentId, studentId))
+        .orderBy(desc(studentAeeNote.createdAt)),
+    ]);
 
     return {
+      aeeNotes: aeeNotes.map((n) => ({
+        autor: n.autor,
+        papel: n.papel,
+        texto: n.texto,
+      })),
       aiMemorySummary: aiMemory?.summary ?? null,
       goals,
       learningPreferences,
       profile: profile ?? null,
+      recentObservations: recentObservations.map((o) => ({
+        createdAt: o.createdAt,
+        observation: o.observation,
+        origem: o.origem,
+        tipo: o.tipo,
+      })),
       sensitivities,
     };
   } catch (error) {
@@ -780,6 +817,7 @@ export async function createObservacao({
   tipo,
   origem,
   atividadeId,
+  chatId,
 }: {
   studentId: string;
   teacherId: string;
@@ -787,11 +825,20 @@ export async function createObservacao({
   tipo: StudentObservation["tipo"];
   origem: StudentObservation["origem"];
   atividadeId?: string;
+  chatId?: string;
 }): Promise<StudentObservation> {
   try {
     const [created] = await db
       .insert(studentObservation)
-      .values({ atividadeId, observation, origem, studentId, teacherId, tipo })
+      .values({
+        atividadeId,
+        chatId,
+        observation,
+        origem,
+        studentId,
+        teacherId,
+        tipo,
+      })
       .returning();
     return created;
   } catch (error) {
@@ -802,6 +849,95 @@ export async function createObservacao({
 export async function deleteObservacao({ id }: { id: string }) {
   try {
     await db.delete(studentObservation).where(eq(studentObservation.id, id));
+  } catch (error) {
+    throw new ChatbotError("bad_request:database", { cause: error });
+  }
+}
+
+// Conselho comportamental (PLANEJAMENTO.md §4.3): one studentObservation per
+// chat, kept up to date as the conversation continues rather than growing
+// one row per assistant reply — same "latest call replaces the previous
+// version" idea already used by updateAdaptacao, applied to a different
+// table. Called server-side after each assistant turn in a chat that has
+// `chat.studentId` set (see app/(chat)/api/chat/route.ts), never from a
+// model tool call, so there's no risk of the model forgetting to save it.
+export async function upsertConselhoObservation({
+  chatId,
+  studentId,
+  teacherId,
+  observation,
+}: {
+  chatId: string;
+  studentId: string;
+  teacherId: string;
+  observation: string;
+}): Promise<StudentObservation> {
+  try {
+    const [existing] = await db
+      .select()
+      .from(studentObservation)
+      .where(eq(studentObservation.chatId, chatId));
+
+    if (existing) {
+      const [updated] = await db
+        .update(studentObservation)
+        .set({ observation })
+        .where(eq(studentObservation.id, existing.id))
+        .returning();
+      return updated;
+    }
+
+    return await createObservacao({
+      chatId,
+      observation,
+      origem: "conselho",
+      studentId,
+      teacherId,
+      tipo: "neutro",
+    });
+  } catch (error) {
+    throw new ChatbotError("bad_request:database", { cause: error });
+  }
+}
+
+// Finds the teacher's most recent conselho chat for this student (so
+// re-opening "Conversar sobre {Nome}" continues the same thread instead of
+// fragmenting into a new one every time) or creates a fresh one.
+export async function findOrCreateConselhoChat({
+  studentId,
+  teacherId,
+  studentName,
+}: {
+  studentId: string;
+  teacherId: string;
+  studentName: string;
+}): Promise<Chat> {
+  try {
+    const [existing] = await db
+      .select()
+      .from(chat)
+      .where(
+        and(eq(chat.studentId, studentId), eq(chat.userId, teacherId))
+      )
+      .orderBy(desc(chat.createdAt))
+      .limit(1);
+
+    if (existing) {
+      return existing;
+    }
+
+    const [created] = await db
+      .insert(chat)
+      .values({
+        createdAt: new Date(),
+        studentId,
+        title: `Conversa sobre ${studentName}`,
+        userId: teacherId,
+        visibility: "private",
+      })
+      .returning();
+
+    return created;
   } catch (error) {
     throw new ChatbotError("bad_request:database", { cause: error });
   }
@@ -922,6 +1058,38 @@ export async function getTurmasByTeacherId({
   }
 }
 
+// Shared by `saveAtividade` and `savePlanejamentoSemanal` — a teacher's
+// first activity of any kind (daily or weekly) auto-creates their default
+// turma and backfills it with every existing student, so the AI tools never
+// have to ask "which turma?" before the professor has created one.
+export async function resolveActiveTurma({
+  teacherId,
+  turmaNome,
+}: {
+  teacherId: string;
+  turmaNome?: string;
+}): Promise<Turma> {
+  const turmas = await getTurmasByTeacherId({ teacherId });
+  const [activeTurma] = turmas;
+
+  if (activeTurma) {
+    return activeTurma;
+  }
+
+  const [created] = await createTurma({
+    name: turmaNome || "Minha turma",
+    teacherId,
+  });
+
+  const students = await getStudentsByTeacherId({ teacherId });
+  await addStudentsToTurma({
+    studentIds: students.map((s) => s.id),
+    turmaId: created.id,
+  });
+
+  return created;
+}
+
 export async function getTurmaWithStudents({ turmaId }: { turmaId: string }) {
   try {
     const [selectedTurma] = await db
@@ -1021,6 +1189,8 @@ export async function createAtividade({
   content,
   sourceChatId,
   sourceFileUrl,
+  planejamentoSemanalId,
+  diaAplicacao,
 }: {
   turmaId: string;
   teacherId: string;
@@ -1028,13 +1198,17 @@ export async function createAtividade({
   content: AtividadeContent;
   sourceChatId?: string;
   sourceFileUrl?: string;
+  planejamentoSemanalId?: string;
+  diaAplicacao?: string;
 }): Promise<Atividade> {
   try {
     const [createdAtividade] = await db
       .insert(atividade)
       .values({
         content,
+        diaAplicacao,
         objective,
+        planejamentoSemanalId,
         sourceChatId,
         sourceFileUrl,
         teacherId,
@@ -1043,6 +1217,29 @@ export async function createAtividade({
       .returning();
 
     return createdAtividade;
+  } catch (error) {
+    throw new ChatbotError("bad_request:database", { cause: error });
+  }
+}
+
+export async function createPlanejamentoSemanal({
+  turmaId,
+  teacherId,
+  objetivoGeral,
+  sourceChatId,
+}: {
+  turmaId: string;
+  teacherId: string;
+  objetivoGeral?: string;
+  sourceChatId?: string;
+}): Promise<PlanejamentoSemanal> {
+  try {
+    const [created] = await db
+      .insert(planejamentoSemanal)
+      .values({ objetivoGeral, sourceChatId, teacherId, turmaId })
+      .returning();
+
+    return created;
   } catch (error) {
     throw new ChatbotError("bad_request:database", { cause: error });
   }
@@ -1337,6 +1534,39 @@ export async function getAdaptacaoForPrint({
       schoolName: row.schoolName,
       student: row.student,
       teacherId: row.teacherId,
+      turmaName: row.turmaName,
+    };
+  } catch (error) {
+    throw new ChatbotError("bad_request:database", { cause: error });
+  }
+}
+
+export async function getAtividadeForPrint({
+  atividadeId,
+}: {
+  atividadeId: string;
+}) {
+  try {
+    const [row] = await db
+      .select({
+        atividade,
+        schoolName: user.schoolName,
+        turmaGrade: turma.grade,
+        turmaName: turma.name,
+      })
+      .from(atividade)
+      .innerJoin(turma, eq(atividade.turmaId, turma.id))
+      .innerJoin(user, eq(atividade.teacherId, user.id))
+      .where(eq(atividade.id, atividadeId));
+
+    if (!row) {
+      return null;
+    }
+
+    return {
+      atividade: row.atividade,
+      schoolName: row.schoolName,
+      turmaGrade: row.turmaGrade,
       turmaName: row.turmaName,
     };
   } catch (error) {

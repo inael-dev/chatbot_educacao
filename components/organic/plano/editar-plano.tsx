@@ -11,6 +11,7 @@ import { useCallback, useRef, useState } from "react";
 import { toast } from "sonner";
 import { updateAtividadeAction } from "@/app/plano/[id]/editar/actions";
 import { BnccSelector } from "@/components/organic/plano/bncc-selector";
+import { TabBar } from "@/components/organic/tab-bar";
 import type { BnccHabilidade } from "@/lib/ai/bncc";
 import type { Atividade, AtividadeContent } from "@/lib/db/schema";
 
@@ -457,6 +458,8 @@ export function EditarPlano({ atividade }: { atividade: Atividade }) {
           {isSaving ? "Salvando…" : "Salvar plano"}
         </button>
       </div>
+
+      <TabBar />
 
       {isSelectorOpen ? (
         <BnccSelector

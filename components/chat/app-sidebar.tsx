@@ -140,7 +140,7 @@ export function AppSidebar({ user }: { user: User | undefined }) {
                     onClick={closeMobile}
                     tooltip="Alunos"
                   >
-                    <Link href="/alunos">
+                    <Link href="/">
                       <UsersIcon className="size-4" />
                       <span className="font-medium">Alunos</span>
                     </Link>

@@ -1,6 +1,12 @@
 "use client";
 
-import { ArrowLeftIcon, CheckIcon, PlusIcon, XIcon } from "lucide-react";
+import {
+  ArrowLeftIcon,
+  CheckIcon,
+  MessageCircleIcon,
+  PlusIcon,
+  XIcon,
+} from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { type ChangeEvent, type FormEvent, useCallback, useState } from "react";
@@ -9,7 +15,9 @@ import {
   registrarObservacaoAction,
   removerObservacaoAction,
   responderAeeAction,
+  startConselhoChatAction,
 } from "@/app/aluno/[id]/actions";
+import { TabBar } from "@/components/organic/tab-bar";
 import type {
   getAeeNotes,
   getRecentAtividadesForStudent,
@@ -193,6 +201,7 @@ export function AlunoProfile({
   const [confirmingRemoveId, setConfirmingRemoveId] = useState<string | null>(
     null
   );
+  const [isStartingConselho, setIsStartingConselho] = useState(false);
 
   const displayName = student.preferredName || student.name;
   const idade = calcIdade(student.birthDate);
@@ -200,6 +209,11 @@ export function AlunoProfile({
   const handleBack = useCallback(() => router.back(), [router]);
   const handleOpenForm = useCallback(() => setIsFormOpen(true), []);
   const handleCloseForm = useCallback(() => setIsFormOpen(false), []);
+
+  const handleConversarClick = useCallback(async () => {
+    setIsStartingConselho(true);
+    await startConselhoChatAction({ studentId: student.id });
+  }, [student.id]);
 
   const handleAskRemover = useCallback(
     (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -345,6 +359,22 @@ export function AlunoProfile({
           </div>
         </div>
 
+        <button
+          className="btn btn-primary btn-block"
+          disabled={isStartingConselho}
+          onClick={handleConversarClick}
+          style={{
+            alignItems: "center",
+            display: "flex",
+            gap: 8,
+            justifyContent: "center",
+          }}
+          type="button"
+        >
+          <MessageCircleIcon size={16} strokeWidth={2.75} />
+          {isStartingConselho ? "Abrindo…" : `Conversar sobre ${displayName}`}
+        </button>
+
         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
           <div
             style={{
@@ -431,6 +461,7 @@ export function AlunoProfile({
                       style={{ color: "var(--color-muted)", fontSize: 10.5 }}
                     >
                       {formatDate(new Date(entry.createdAt))}
+                      {entry.origem === "conselho" ? " · Conselho da IA" : ""}
                     </span>
                   </div>
                   {confirmingRemoveId === entry.id ? (
@@ -614,6 +645,8 @@ export function AlunoProfile({
           Gerar atividade adaptada
         </Link>
       </div>
+
+      <TabBar />
     </>
   );
 }

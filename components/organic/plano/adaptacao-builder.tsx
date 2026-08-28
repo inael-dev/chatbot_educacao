@@ -13,6 +13,7 @@ import {
 import { toast } from "sonner";
 import { acceptAdaptacaoAction } from "@/app/plano/[id]/aluno/[studentId]/actions";
 import { AdaptacaoMessage } from "@/components/organic/plano/adaptacao-message";
+import { TabBar } from "@/components/organic/tab-bar";
 import { useActiveChat } from "@/hooks/use-active-chat";
 import type { getStudentAdaptacaoContext } from "@/lib/db/queries";
 import type { Atividade, AtividadeAdaptada, Student } from "@/lib/db/schema";
@@ -370,6 +371,8 @@ export function AdaptacaoBuilder({
           {isAccepting ? "Gerando…" : "Aceitar e gerar PDF"}
         </button>
       </div>
+
+      <TabBar />
     </>
   );
 }

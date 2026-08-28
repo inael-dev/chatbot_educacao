@@ -1,10 +1,15 @@
 import { notFound, redirect } from "next/navigation";
 import { Suspense } from "react";
+import { ConselhoChat } from "@/components/organic/aluno/conselho-chat";
 import { DataStreamProvider } from "@/components/chat/data-stream-provider";
 import { NovaAulaChat } from "@/components/organic/chat/nova-aula-chat";
 import { OrganicShell } from "@/components/organic/organic-shell";
 import { ActiveChatProvider } from "@/hooks/use-active-chat";
-import { getChatById, getTurmaContextForChat } from "@/lib/db/queries";
+import {
+  getChatById,
+  getStudentForProfile,
+  getTurmaContextForChat,
+} from "@/lib/db/queries";
 import { auth } from "../../(auth)/auth";
 
 export default function ChatPage({
@@ -35,6 +40,30 @@ async function ChatPageContent({
 
   if (!chat || chat.userId !== session.user.id) {
     notFound();
+  }
+
+  if (chat.studentId) {
+    const student = await getStudentForProfile({
+      studentId: chat.studentId,
+      teacherId: session.user.id,
+    });
+
+    if (!student) {
+      notFound();
+    }
+
+    return (
+      <OrganicShell className="flex min-h-dvh flex-col">
+        <DataStreamProvider>
+          <ActiveChatProvider>
+            <ConselhoChat
+              studentId={student.id}
+              studentName={student.preferredName || student.name}
+            />
+          </ActiveChatProvider>
+        </DataStreamProvider>
+      </OrganicShell>
+    );
   }
 
   const turmaContext = await getTurmaContextForChat({ chatId: id });

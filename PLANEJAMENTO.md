@@ -1,485 +1,421 @@
 # Planejamento — Plataforma de IA para Educação Inclusiva
 
-> Documento de trabalho. Reflete o entendimento atual do produto e será atualizado
-> conforme validarmos premissas com escolas/prefeituras. Pontos marcados como
-> **[EM ABERTO]** dependem de validação com o cliente antes de virar decisão técnica.
+> Documento de trabalho. Reescrito em 2026-08-27 porque a versão anterior tinha ficado
+> desatualizada em relação ao código real (schema já implementa boa parte do que estava
+> listado como "falta fazer") e misturava demais ideia + decisão + rascunho. Pontos
+> marcados **[EM ABERTO]** dependem de validação com cliente/professor real antes de
+> virar decisão técnica travada. A referência visual canônica das telas é o handoff
+> `design_handoff_adapta/README.md` — este documento não repete o que já está descrito
+> lá, só referencia e adiciona o que é novo.
 
 ## 1. Posicionamento
 
-Não é "um chatbot para professores". É uma **plataforma de planejamento e adaptação
-pedagógica com IA**.
+Não é "um chatbot para professores". É uma **plataforma de planejamento, adaptação
+pedagógica e apoio comportamental com IA**, com dois pilares complementares:
+
+1. **Planejamento e adaptação:** o professor prepara uma proposta de aula (ou da
+   semana) e a plataforma gera as adaptações necessárias para que cada estudante
+   participe da mesma experiência de aprendizagem, alinhada à BNCC.
+2. **Apoio do dia a dia:** o professor pode, a qualquer momento (inclusive pelo
+   celular, em sala), relatar uma situação de comportamento de um aluno específico e
+   receber orientação de manejo fundamentada no histórico e no perfil daquele aluno —
+   não é conversa genérica, é conselho contextualizado.
 
 **Discurso de venda:**
-> "Nossa IA preserva o planejamento do professor e adapta automaticamente as
-> atividades para cada aluno que necessite de apoio, mantendo todos trabalhando o
-> mesmo objetivo pedagógico, alinhado à BNCC e aos princípios da educação inclusiva."
-
-O professor prepara **uma única proposta de aula**; a plataforma gera as adaptações
-necessárias para que cada estudante participe da mesma experiência de aprendizagem.
+> "Nossa IA preserva o planejamento do professor, adapta automaticamente as atividades
+> para cada aluno que precisa de apoio, e ajuda o professor a lidar com o dia a dia da
+> sala — tudo ancorado no histórico real de cada criança, alinhado à BNCC e aos
+> princípios da educação inclusiva."
 
 ## 2. Público e clientes
 
-- **Público de uso:** Educação Infantil e Ensino Fundamental I (possibilidade futura
-  de expansão para outras etapas).
-- **Clientes:** prefeituras / secretarias de educação, escolas particulares.
-- **[EM ABERTO]** Uso restrito a professores do AEE ou também professores regentes?
-  Foco inicial só em alunos atípicos ou toda a turma?
+- **Público de uso:** Educação Infantil e Ensino Fundamental I (expansão futura possível).
+- **Clientes:** prefeituras/secretarias de educação, escolas particulares.
+- **[EM ABERTO]** Uso restrito a professores do AEE ou também regentes? Foco inicial só
+  em alunos atípicos ou toda a turma?
 - Municípios podem já ter ferramenta própria de planejamento (ex: Fortaleza —
-  "Professor Online", ver 3.2); validar integração/coexistência na Fase 0, não
-  assumir que o produto substitui essa camada.
+  "Professor Online", seção 3.2) — validar coexistência/integração na Fase 0, não
+  assumir substituição.
 
-## 3. O diferencial real
+## 3. Diferencial e concorrência
 
-Não é o chatbot nem a geração de PDF. É o **contexto pedagógico contínuo**: cada
-aluno tem um histórico vivo, e a IA usa esse histórico em todas as decisões
-(planejar, adaptar, registrar resultado, sugerir próximos passos) ao longo do ano
-letivo. Isso é o que separa o produto de uma ferramenta genérica de IA.
+### 3.1 O que já é mercado disputado (não é diferencial sozinho)
 
-### 3.1 Panorama competitivo (pesquisa 2026-08)
+- **Adaptação de atividade por aluno/PEI:** **Lírios** (lirios.tech) já faz quase
+  exatamente o Modelo A deste projeto (turma → IA adapta por aluno a partir do PEI) e
+  está vendendo direto pra prefeitura ("Municípios Pioneiros 2026"). **Prova Adaptada**
+  adapta por *tipo de condição* (não por aluno individual), 50 escolas particulares,
+  R$1M investido, ambição declarada de ir pra rede pública.
+- **Geração de plano semanal/BNCC:** categoria concorrida — AulaGen (diário a anual,
+  BNCC, já com "adaptações"), PlanoEdu, Prof.AI, Plano AI, planoaula.com.br,
+  planejamentodeaulasbncc.com.br. **A "ficha semanal" (seção 4.2) não deve ser vendida
+  como diferencial — é conveniência de fluxo, não avanço competitivo.**
 
-Já existem players brasileiros fazendo adaptação de atividade com IA para
-neurodivergência — o mercado não está vazio:
+### 3.2 O que ainda parece espaço livre (pesquisa 2026-08-27)
 
-- **[Lírios](https://www.lirios.tech/)** — o mais parecido com o Modelo A daqui
-  (seção 4.2): professor cria avaliação alinhada à BNCC, sistema adapta por
-  aluno a partir do PEI. Está recrutando **"Municípios Pioneiros 2026"** (só 3
-  vagas) — já vendendo direto pra prefeitura, no mesmo mercado-alvo deste
-  projeto, agora.
-- **[Prova Adaptada](https://www.projetodraft.com/inclusao-na-escola-eles-criaram-uma-plataforma-que-em-30-segundos-adapta-provas-e-licoes-de-casa-para-alunos-neurodivergentes/)**
-  — professor sobe a atividade, seleciona quais condições precisam de
-  adaptação, gera versão em 30s. Adaptação é **por tipo de condição**, não por
-  aluno individual. 50 escolas, hoje só rede particular (Rede La Salle,
-  Colégio São Francisco Xavier), R$1M investido pelos fundadores; ambição
-  declarada de ir pra rede pública depois.
-- **[Vínculoo](https://vinculoo.com.br/)** — mais gestor de caso (PEI/PDI/PAEE
-  + contexto familiar) do que gerador de atividade; atende particular,
-  prefeitura/estado e família direto. Concorrente adjacente, não direto.
-- **Lupa IA, Para Casa Inclusivo, Inclui.ai** — variações menores do mesmo
-  tema, fluxo turma-vs-individual pouco claro publicamente.
+- **Conselho comportamental ancorado no histórico do aluno, em tempo real:**
+  pesquisa dedicada (web, 2026-08-27) não encontrou nenhum concorrente — brasileiro ou
+  internacional — que ofereça um chat onde o professor relata uma situação de
+  comportamento de uma criança específica e recebe orientação fundamentada no
+  perfil/histórico daquele aluno. O mais próximo:
+  - **Vínculoo** tem um assistente chamado **"Apoio Inteligente"** (chat em linguagem
+    natural pro professor tirar dúvidas) — formato parecido, mas não confirmado se é
+    ancorado no histórico individual em tempo real ou é orientação genérica sobre
+    inclusão/documentação. **Risco:** Vínculoo cresceu **16x em 12 meses** (320+
+    escolas, 2.300 professores, 10 mil alunos, projeção 20 mil até fim de ano),
+    puxada pelo Decreto 12.686/2025 que expandiu a obrigação de PAEE — é o concorrente
+    que mais rápido poderia fechar essa lacuna, não um adjacente distante.
+  - **SchoolAI** (internacional) tem "Mission Control" (chatbot de intervenção
+    comportamental, mas genérico/dashboard, não amarrado a perfil individual) e
+    "AI Coach" (coaching de desenvolvimento profissional do professor, não conselho
+    situacional sobre uma criança).
+  - Categoria "SEL (apoio socioemocional) com IA para professor" ainda não tem líder
+    claro — ferramentas existentes (Panorama Education, Satchel Pulse, ClassDojo,
+    TeachFX) são dashboards/analytics de turma, não chat individual conversacional.
+- **Colaboração AEE↔regente:** pesquisa acadêmica mostra que essa parceria
+  **rotineiramente falha na prática** na rede municipal (regente muitas vezes nem
+  conhece o PEI do aluno) — nenhum concorrente pesquisado resolve isso de forma
+  visível. Ver seção 3.3.
 
-**Implicação:** "turma primeiro, IA adapta pra quem precisa" (seção 4) segue
-validado, mas deixou de ser diferencial único — o Lírios já faz quase isso e
-já está batendo em porta de prefeitura. Nenhum concorrente pesquisado resolve
-de forma visível o problema institucional real (ver 3.2): a colaboração entre
-professor regente e AEE, que a pesquisa mostra que **não acontece na prática**
-na rede municipal. Ver seção 10 (riscos) e seção 8.2 (perguntas).
+**Conclusão prática:** o diferencial defensável não é mais "gerar atividade adaptada"
+(commodity crescente) — é a combinação **conselho comportamental contextualizado +
+colaboração AEE↔regente estruturada**, ambos ancorados no mesmo histórico vivo do
+aluno que a adaptação de atividade já alimenta. Validar isso como aposta central na
+Fase 0 (seção 9), não como suposição.
 
-### 3.2 Como o planejamento funciona hoje (pesquisa 2026-08)
+### 3.3 Como o planejamento/colaboração funcionam hoje (pesquisa 2026-08)
 
-- **Fortaleza (SME)** lançou em ago/2025 a plataforma própria **"Professor
-  Online"**: planejamento, frequência, acompanhamento pedagógico, integrada ao
-  currículo próprio da rede (DCRFor), com coordenador validando o
-  planejamento do professor. Sem menção a IA, adaptação ou AEE. Pra esse tipo
-  de prefeitura, o pitch não é "façam planejamento aqui" — é **a camada de
-  inclusão que a ferramenta deles não cobre**; validar na Fase 0 se precisa
-  integrar ou se dá pra coexistir.
-- **AEE + professor regente:** o modelo formal já é "turma primeiro, atípico
-  depois" — regente planeja pra turma, professor de AEE (Sala de Recursos
-  Multifuncionais) colabora na adaptação. Mas pesquisa acadêmica mostra que na
-  **rede municipal** essa parceria costuma **não acontecer de fato** — falta
-  diálogo, o regente muitas vezes nem conhece o PEI do aluno, faltam recursos
-  pedagógicos. Na rede estadual a articulação é melhor. Isso reforça a seção
-  3.1: o buraco real pode estar mais na colaboração do que na geração de
-  conteúdo.
-- **PEI é obrigação legal**, não boa prática — art. 28 da Lei 13.146/2015 (Lei
-  Brasileira de Inclusão), exigível sempre que o aluno tem necessidade
-  específica de aprendizagem. Isso é munição de venda ("ajuda a cumprir uma
-  obrigação legal hoje feita manualmente ou não feita") e reforça que
-  `atividadeAdaptada` (seção 4.3) deveria, na Fase 3, poder alimentar o PEI
-  formal do aluno — não é feature bônus.
+- **Fortaleza (SME)** roda "Professor Online" desde ago/2025: planejamento,
+  frequência, acompanhamento, currículo próprio (DCRFor), coordenador validando o
+  planejamento. Sem IA, sem adaptação, sem AEE. Pra esse tipo de prefeitura o pitch é
+  "a camada de inclusão que a ferramenta deles não cobre", não "façam planejamento
+  aqui".
+- **AEE + regente:** modelo formal é "turma primeiro, atípico depois" (regente planeja
+  pra turma, AEE colabora na adaptação), mas pesquisa mostra que na rede municipal essa
+  parceria costuma não acontecer de fato — falta diálogo, recursos, o regente às vezes
+  nem conhece o PEI. Rede estadual articula melhor.
+- **PEI é obrigação legal**, não boa prática — art. 28 da Lei 13.146/2015 (LBI),
+  exigível sempre que o aluno tem necessidade específica. Munição de venda ("cumpre uma
+  obrigação legal hoje feita manualmente ou não feita"); `studentObservation` +
+  `studentAeeNote` (seção 5) devem, na Fase 3, poder alimentar o PEI formal.
 
-## 4. Fluxo principal do produto
+## 4. Os três fluxos do produto
 
-Modelo adotado como hipótese de trabalho (turma primeiro, aluno como modificador):
+### 4.1 Planejamento de aula → adaptação por aluno (existente, telas 2-4/6/7 do handoff)
 
 ```
-Planejamento da aula
+Professor descreve a aula (chat) ou anexa plano pronto (foto/PDF)
       ↓
-Objetivo pedagógico (BNCC)
-      ↓
-Turma
-      ↓
-IA cria atividade principal
+IA monta o plano completo da turma (tema, objetivo, BNCC real, momentos, avaliação)
       ↓
 IA identifica alunos que provavelmente precisam de adaptação
       ↓
-IA gera versões adaptadas (mesmo objetivo, mesmo conteúdo, mesmo momento da aula)
+IA gera versão adaptada por aluno (mesmo objetivo, mesmo momento da aula)
+      ↓
+Professor revisa/valida em /atividades — não no histórico do chat
 ```
 
-Exemplo:
-- Atividade original: "Conte as maçãs e escreva o resultado."
-- João (TEA, dificuldade motora): "Conte as maçãs e coloque o número correspondente
-  usando cartões."
-- Maria (TDAH): versão com menos distração visual.
-- Pedro (deficiência intelectual): versão com menos elementos.
+Já implementado (ver seção 5): tool `saveAtividade` gera `atividade` + uma
+`atividadeAdaptada` por aluno sinalizado. Fluxo em lote (uma ação → N saídas), não
+"chat por aluno" — benchmarking (MagicSchool AI, Diffit, Brisk Teaching, SchoolAI)
+confirma que nenhum concorrente usa "conversa por aluno" como mecanismo principal;
+com turma de 10-15+ alunos isso é inviável na prática. O chat por aluno
+(`/plano/:id/aluno/:id`) continua existindo, mas como ajuste fino ("deixa a da Ana
+mais visual"), não como criação primária.
 
-Todos trabalham o mesmo objetivo (contagem), no mesmo momento da aula.
+**Decisão em aberto herdada — Modelo A vs B [EM ABERTO]:** ponto de partida é a turma
+(atividade única com derivações) ou o aluno individual (atividade própria por aluno)?
+Muda a arquitetura de dados. Não decidir sem validar com professor/coordenação real.
 
-Fluxo proativo desejado: ao clicar em "Finalizar atividade", a IA avisa
-*"Detectei N alunos que provavelmente precisarão de adaptação: [lista]. Deseja gerar
-automaticamente as versões adaptadas?"* — o professor não precisa pedir.
+### 4.2 Planejamento semanal (novo — ✅ implementado 2026-08-27, ver `fases.md` § Fase 2A)
 
-### 4.1 UX da geração de adaptações — ação em lote, não chat por aluno
+Ideia validada com inael (2026-08-27): em vez de só criar uma aula por dia, o
+professor manda **o planejamento da semana inteira, uma vez, pra turma como um todo**.
+A partir disso o sistema **decompõe automaticamente em atividades diárias** ao longo
+dos dias da semana, reaproveitando o mesmo pipeline de adaptação por aluno da seção
+4.1 (não é um mecanismo novo de adaptação, é uma forma diferente de dar o input).
 
-Benchmarking (2026-08) contra MagicSchool AI, Diffit, Brisk Teaching e SchoolAI: nenhuma
-dessas ferramentas usa "abrir uma conversa por aluno" como mecanismo principal de
-diferenciação. O padrão do mercado é **uma entrada do professor → uma ação em lote → N
-saídas diferentes**, usando dados de perfil já cadastrados (interesse, nível, condição)
-como parâmetro silencioso do prompt — não como algo perguntado no momento pela IA.
+```
+Professor descreve o planejamento da semana (uma vez, pra turma)
+      ↓
+IA quebra em N atividades diárias (mesma lógica de "momentos"/objetivo já usada)
+      ↓
+Para cada atividade diária: mesmo pipeline da seção 4.1
+      (identifica quem precisa de adaptação → gera versão por aluno)
+      ↓
+Semana inteira revisável num só lugar (ficha semanal)
+```
 
-Isso resolve o incômodo identificado por inael: com uma turma de 10-15+ alunos, entrar
-"chat por chat" pra gerar adaptação de cada um é inviável na prática, mesmo que o
-resultado individual seja bom.
+**Por que isso é conveniência de fluxo, não diferencial (ver 3.1):** o mercado de
+geração de plano semanal com BNCC já é disputado. O valor real aqui é reduzir fricção
+de entrada (uma interação em vez de cinco) mantendo a adaptação por aluno acoplada —
+isso sim é diferencial, herdado da seção 4.1.
 
-Fluxo adotado:
+**Implementado:** tabela `planejamentoSemanal` + `atividade.planejamentoSemanalId` +
+`atividade.diaAplicacao`, tool `savePlanejamentoSemanal`, testado ao vivo (ver
+`fases.md` § Fase 2A.4). Sem tela nova — as atividades da semana aparecem
+automaticamente em `/atividades` e `/plano/:id`, cada uma com a tag do dia.
 
-1. Professor descreve a atividade/objetivo da turma **uma única vez** (tela da turma).
-2. Botão **"Gerar adaptações"** — o sistema gera, em uma única ação, uma versão
-   adaptada por aluno sinalizado (ou selecionado manualmente), injetando automaticamente
-   o perfil de cada um (`studentCondition`, `studentInterest`,
-   `studentLearningPreference`, níveis de `studentProfile` — já existem no schema atual).
-3. Resultado aparece como **lista/grade de atividades geradas**, uma por aluno — não como
-   conversas separadas.
-4. O chat por aluno continua existindo, mas como **ferramenta secundária de ajuste fino**
-   ("deixa a da Ana mais visual"), não como o mecanismo principal de criação.
+**Resolvido (2026-08-27, inael):** "pode fazer nas duas situações" — a adaptação por
+aluno em cada dia é **opcional por chamada**, não um modo fixo. Se o professor já
+sinalizou quem adaptar num dia específico durante a conversa, a IA já inclui; senão,
+fica pra depois, individualmente, quando o professor abrir aquele dia em `/plano/:id`.
+Não existe mais uma escolha binária "confirma dia a dia" vs "gera as 5 de uma vez" — a
+tool sempre cria as N atividades-base de uma vez (o professor já trouxe o conteúdo
+pronto), e só a *adaptação por aluno* é que fica flexível dia a dia.
 
-**Status:** direção validada com inael e apoiada por benchmarking de mercado — hipótese
-mais forte que antes, mas ainda **não é decisão fechada**: falta a validação de Fase 0
-com professor/coordenação real (ver seção 9). Não hard-commitar UX/schema como definitivo
-antes disso.
+**Ainda em aberto:** cadência sempre semanal ou período escolhido pelo professor? Não
+apareceu necessidade real ainda — `periodoInicio`/`periodoFim` foram deliberadamente
+deixados fora do schema (YAGNI) até um caso de uso pedir.
 
-### 4.2 Decisão em aberto — Modelo A vs Modelo B **[EM ABERTO — validar com cliente]**
+### 4.3 Conselho comportamental por aluno (✅ implementado 2026-08-27, ver `fases.md` § Fase 2B)
 
-| | Modelo A (adotado como hipótese) | Modelo B |
-|---|---|---|
-| Ponto de partida | Turma / objetivo da aula | Aluno individual |
-| Atividade da turma | Uma só, com derivações | Uma por aluno, criada à parte |
-| Papel do perfil do aluno | Modificador de uma atividade-base | Ponto de partida da geração |
-| Alinhamento BNCC | Mais direto (garante acesso ao mesmo currículo) | Depende de como for implementado |
+Exemplo motivador: professor no celular, em sala, escreve "ele tá muito agitado hoje,
+não para quieto" sobre um aluno específico — a IA responde com orientação de manejo
+fundamentada no perfil e histórico daquele aluno (condição, o que já funcionou antes,
+notas do AEE), não uma resposta genérica de "dicas de sala de aula".
 
-Essa escolha muda a experiência de uso e a arquitetura de dados — **não decidir sem
-validar com professores, coordenação e secretaria**.
+**Onde vive (decisão 2026-08-27):** ponto de entrada **separado do fluxo de
+atividade**, dentro do perfil do aluno (`/aluno/:id` — tela 8 do handoff, que já reúne
+histórico + colaboração AEE). Não fica dentro de `/plano/:id/aluno/:id` (o construtor
+de adaptação, tela 5) porque aquele é um fluxo estruturado e versionado (v1, v2...)
+amarrado a uma atividade/aula específica — desabafo de comportamento é atemporal, não
+tem "versão de plano".
 
-### 4.3 Mapeamento com o schema atual
+**Regra de registro (decisão 2026-08-27):** toda conversa desse tipo **sempre vira uma
+entrada no histórico do aluno** (`studentObservation`, que já existe e já modela
+exatamente isso: `tipo` positivo/barreira/neutro, `origem` feedback/avulso). Precisa
+adicionar um novo valor de `origem` (ex.: `"conselho"`) pra diferenciar de observação
+avulsa digitada à mão.
 
-O que já existe no schema (`lib/db/schema.ts`), além do `user`/auth original do template:
+```
+Professor abre "Conversar sobre {Nome}" em /aluno/:id
+      ↓
+Relata a situação (texto livre, sem estrutura obrigatória)
+      ↓
+IA consulta perfil + condição + últimas N observações + notas AEE do aluno
+  (lookupStudent já existe; falta a tool ler studentObservation/studentAeeNote)
+      ↓
+IA aconselha (estratégia de manejo, não gera atividade)
+      ↓
+Conversa vira automaticamente uma StudentObservation (origem: "conselho")
+```
+
+**Implementado:** `chat.studentId`, `studentObservation.chatId`/`origem: "conselho"`,
+`getStudentFullContext` estendido com histórico+AEE, prompt dedicado, registro
+**automático server-side** (não tool-call — mais confiável, ver `fases.md` § Fase
+2B.2 pra por quê). Testado ao vivo: a IA citou corretamente a condição, uma
+observação anterior e uma estratégia já eficaz de uma aluna de teste.
+
+**Resolvido (2026-08-27):**
+- LGPD: inael confirmou "editar e apagar como observação manual" — só **apagar**
+  existe hoje (pra qualquer observação, manual ou não; editar-em-lugar nunca existiu,
+  nem antes desta feature). `removerObservacaoAction` já cobre isso sem mudança.
+- Tom: reaproveita a regra "sugere, não diagnostica, encaminha pra profissional"
+  já usada na adaptação de atividade + instrução de resposta curta. Sem limite de
+  frequência — não implementado por falta de sinal real de necessidade (decisão
+  minha, não pedido do inael — revisitar se virar problema real).
+
+### 4.4 Colaboração AEE ↔ regente (existente, tela 8 do handoff)
+
+Já modelado (`studentAeeNote`): professor de AEE deixa nota no perfil do aluno,
+regente responde. Continua sendo a aposta central de diferenciação de longo prazo
+(seção 3.2/3.3) — nenhum concorrente pesquisado ataca isso de forma visível.
+
+## 5. Onde os dados já vivem (schema real, `lib/db/schema.ts`)
+
+**Importante:** a versão anterior deste documento listava turma/atividade/adaptação
+como "não implementado ainda" — isso estava **desatualizado**. Checado direto no
+schema em 2026-08-27, já existe:
 
 - `student`, `studentProfile` (níveis 1-5), `studentCondition`, `studentInterest`,
-  `studentLearningPreference`, `studentSensitivity`, `studentGoal`,
-  `studentObservation`, `studentAiMemory` (resumo vivo do aluno) — cobre bem mais do
-  que o "perfil básico" previsto originalmente pra Fase 1 (seção 9).
-- Tools de IA já plugadas no chat: `lookupStudent` (busca perfil completo por nome) e
-  `lookupBnccHabilidade` (consulta oficial de habilidades BNCC).
-- Tela `/alunos` (`app/(dashboard)/alunos/page.tsx`) — lista somente leitura dos alunos
-  do professor logado.
+  `studentLearningPreference`, `studentSensitivity`, `studentGoal`, `studentAiMemory`
+  (resumo vivo do aluno, usado como contexto compacto em vez do histórico completo).
+- `studentObservation` — **já é** a timeline/histórico do handoff (tela 8): `tipo`
+  (positivo/barreira/neutro), `origem` (feedback/avulso), `atividadeId` opcional.
+  Precisa só do novo valor de `origem` pra seção 4.3.
+- `studentAeeNote` — **já é** a colaboração AEE↔regente (seção 4.4): `autor`, `papel`
+  (aee/regente), `texto`.
+- `turma`, `turmaStudent` (join many-to-many, porque um professor pode ter mais de uma
+  turma e um aluno pode trocar de turma).
+- `atividade` — atividade-base da turma (`content` estruturado: tema, duração,
+  recursos, unidades temáticas, habilidades BNCC, momentos, avaliação; `sourceChatId`,
+  `sourceFileUrl`, `status` draft/finalizada).
+- `atividadeAdaptada` — versão por aluno (`content` no mesmo formato, `status`
+  gerando/rascunho/validada, `editedByTeacher`).
+- Tools de IA já plugadas no chat: `lookupBnccHabilidade`, `lookupStudent`,
+  `listStudents`, `saveAtividade` (cria turma se não existir + atividade +
+  atividadeAdaptada por aluno).
+- **"Professor" ainda é só `user`**, mas já tem `user.schoolName` (migração 0005,
+  2026-08-07) — resolve o cabeçalho de impressão sem precisar de entidade `escola`
+  própria; não há rede/multi-escola por trás disso ainda (fica pra Fase 4).
 
-O que falta pra viabilizar o fluxo da seção 4.1 (decidido em 2026-08-05, ver 4.4;
-implementação em andamento no schema):
+**O que falta de fato** (não é retrabalho, é extensão do que já existe):
+1. `chat.studentId` (ou equivalente) — seção 4.3.
+2. Novo valor de `origem` em `studentObservation` — seção 4.3.
+3. Agrupamento de `atividade` por semana — seção 4.2.
+4. Campo de dia/data de aplicação em `atividade` — seção 4.2.
+5. Tool de IA que leia `studentObservation`/`studentAeeNote` como contexto — seção 4.3.
 
-- **`turma`** — hoje não existe agrupamento de alunos por turma; `student.teacherId`
-  aponta pro professor, mas não há turma nem disciplina.
-- **`turmaStudent`** — tabela de vínculo many-to-many entre `turma` e `student`.
-  Decidido em vez de turma = "todos os alunos do professor" porque um professor pode
-  ter mais de uma turma e um aluno pode trocar de turma; a lista de alunos.teacherId
-  sozinha não aguentaria isso sem retrabalho depois.
-- **`atividade`** — a atividade-base gerada pra turma (objetivo, conteúdo, código BNCC,
-  turmaId, teacherId, `sourceChatId` apontando pra conversa que a gerou) não tem
-  tabela própria ainda.
-- **`atividadeAdaptada`** — a versão gerada por aluno a partir de uma `atividade`
-  (studentId, atividadeId, conteúdo adaptado, status `gerando`/`rascunho`/`validada`,
-  `editedByTeacher`) também não existe.
-- **Professor como entidade própria** — hoje "professor" é só `user`; não há
-  turma/escola/rede associada a ele além do que o auth do template já oferece.
+## 6. Telas
 
-Isso confirma o que a seção 9 (Fase 1) já previa como próximo passo de schema
-("turma, aluno, professor, atividade") — a parte de aluno já está adiantada, o restante
-ainda está por fazer.
+Base canônica: `design_handoff_adapta/README.md` (8 telas, rotas, copy exata, layout).
+Não repetido aqui. Duas adições que o handoff original não cobre:
 
-### 4.4 Onde revisar e editar as atividades — decidido (2026-08-05)
+- **Ponto de entrada do conselho comportamental** dentro de `/aluno/:id` (tela 8) —
+  ex.: botão/card "Conversar sobre {Nome}" perto da timeline. Precisa de mockup próprio
+  — não existe ainda no handoff visual.
+- **Ficha semanal** (seção 4.2) — tela nova, sem mockup ainda. Provável rota
+  `/planejamento` ou `/plano-semanal` (nome final em aberto).
 
-O chat **não** é o lugar onde a atividade adaptada fica salva pra revisão. Mensagens de
-chat são conversa efêmera — sem status, sem forma de listar as adaptações da turma
-inteira num painel, sem "isso já foi validado". Por isso `atividade` e
-`atividadeAdaptada` (seção 4.3) existem como registros estruturados, separados do
-histórico de mensagens que os gerou.
+**Status de implementação (corrigido 2026-08-27, checado direto no repo):** as 8 telas
+do handoff **já existem e estão ligadas a dados reais**, não só a tela 1/2 como uma
+versão anterior deste documento chegou a dizer por engano — `app/page.tsx` (1),
+`app/nova-aula` (2), `app/plano/[id]` (3), `app/plano/[id]/editar` (4),
+`app/plano/[id]/aluno/[studentId]` (5), `app/(print)/atividades/[id]/imprimir/...` (6,
+via impressão do navegador em vez de PDF gerado no servidor), `app/atividades` (7),
+`app/aluno/[id]` (8, já com histórico + colaboração AEE). Ver detalhamento tela a tela
+em `fases.md` § Fase 1. Não confundir "tela existe e funciona" com "validada por
+professor real" — isso continua em aberto (Fase 0).
 
-Fluxo decidido:
+## 7. Papel da IA
 
-1. **Chat da turma** (principal) — professor descreve a atividade/objetivo uma vez;
-   a IA gera a `atividade` base e uma `atividadeAdaptada` por aluno sinalizado.
-2. **Tela de revisão** (por turma + atividade) — grade com um card por aluno, cada um
-   mostrando a `atividadeAdaptada` gerada. Edição rápida acontece direto ali (editor
-   estruturado, sem precisar reabrir o chat). Botão "Validar" por aluno e "Validar
-   todos" em lote — isso é o que marca `atividadeAdaptada.status = validada`.
-3. **Clique num aluno** → redireciona pro chat individual dele. Serve pra ajuste fino
-   ("deixa a da Ana mais visual"): ao gerar algo novo nesse chat, o resultado
-   **atualiza o mesmo registro `atividadeAdaptada`** em vez de virar uma conversa
-   desconectada da atividade.
+A IA **não adivinha** — recebe contexto antes de agir. "Crie atividade pra Maria" →
+consulta cadastro, histórico, objetivos, BNCC, observações, só então monta o prompt.
 
-Isso mantém o chat como mecanismo de geração (turma-first e, secundariamente,
-aluno-a-aluno para ajuste fino), enquanto o dado que importa pra revisão/aprovação
-vive em tabelas próprias — consistente com o Motor de Adaptação Pedagógica previsto
-como módulo separado na seção 5 e o editor pré-exportação da Fase 2 (seção 9).
+**Faz:** sugerir/adaptar atividade, explicar BNCC, aconselhar sobre manejo
+comportamental (seção 4.3, ancorado em contexto real), resumir observações, apoiar
+planejamento (diário e semanal).
+**Não faz:** substituir o professor, decidir sozinha sem contexto do aluno, diagnosticar.
 
-### 4.5 Template de impressão — layout e cabeçalho **[EM ABERTO — refinamento em andamento]**
+## 8. Arquitetura — evolução deste repositório
 
-Primeira tentativa (tema cordel/xilogravura, 2026-08-10/11) foi rejeitada por inael
-("não gostei, temos muito que trabalhar nisso") sem detalhamento do motivo ainda.
-Nova direção, definida a partir de duas referências visuais em 2026-08-11:
+Este projeto (`chatbot`) **é a base** da plataforma, não um projeto à parte.
 
-- **Fundo branco, com borda decorativa** (não fundo colorido) — referência 1 mostrava
-  borda decorativa colorida (azul/laranja, padrão ondulado) num fundo branco; a borda
-  é o elemento "lúdico" aprovado, não uma textura/tema aplicada à página toda.
-- **Precisa funcionar em preto e branco** — muitas escolas só têm impressora P&B; a
-  borda decorativa deve ser desenhada de um jeito que funcione bem só com contorno/
-  traço preto (sem depender de cor pra ser legível ou ficar "bonita"), como a
-  referência 2 (borda geométrica em zigue-zague, só preto e branco).
-- **Cabeçalho no topo da página**, campos definidos (decisão 2026-08-11, ver pergunta
-  feita a inael sobre pré-preenchimento):
-  - **ESCOLA** — preenchido automaticamente a partir do cadastro no sistema.
-  - **TURMA** — preenchido automaticamente a partir do cadastro no sistema.
-  - **PROFESSOR(A)** — em branco, preenchido à mão.
-  - **ALUNO** — em branco, preenchido à mão (mesmo a atividade já sendo gerada para
-    um aluno específico — cobre reimpressão/substituição de professor e reforça a
-    criança escrever o próprio nome).
-  - **DATA** — em branco (campo ___/___/___).
+| Camada | Estado atual | Decisão |
+|---|---|---|
+| Frontend | Next.js (App Router) | mantém |
+| Backend | Next.js API routes (`app/api`) | mantém até haver motivo real pra separar (processamento pesado assíncrono ou múltiplos consumidores fora do Next.js) |
+| Banco | PostgreSQL via Drizzle ORM | mantém |
+| Filas | Redis já é dependência (sem BullMQ ainda) | adicionar BullMQ quando houver job assíncrono real (ex: geração de PDF em lote, decomposição semanal da seção 4.2) |
+| Storage | Cloudflare R2 (`@aws-sdk/client-s3`) | decidido; bucket público `r2.dev` é dev/teste — trocar por domínio próprio/URLs assinadas antes de produção com dado real de aluno |
+| Infra | Vercel (`@vercel/*`: functions, analytics, otel, bot protection) | **[EM ABERTO]** — migrar pra infra própria só se exigência contratual de dado nacional/self-hosted aparecer (comum em contrato público — perguntar na Fase 0) |
+| IA | AI SDK, múltiplos providers resolvidos no código, hoje só OpenAI ativo (`gpt-5-mini`) | outros providers ficam inertes até haver motivo/chave |
 
-**Gap identificado:** hoje não existe entidade `escola` no schema (`lib/db/schema.ts`)
-— "professor" é só `user`, sem escola/rede associada (ver seção 7). Pré-preencher
-ESCOLA no cabeçalho depende de existir algum lugar pra cadastrar esse nome antes; até
-o módulo de Administração (seção 5) existir de fato, provavelmente um campo simples
-no perfil/configuração do professor (`user`) como solução mínima, não a modelagem
-completa de município/escola.
+## 9. Perguntas de descoberta para a reunião com o cliente
 
-Ainda não há mockup novo, PDF pipeline real, nem decisão de biblioteca de renderização
-— isso é só o brief visual acordado antes de produzir a próxima versão (consistente
-com [[feedback-plan-before-execute]]: alinhar antes de gerar artefato).
-
-## 5. Módulos
-
-- **Administração:** municípios, escolas, usuários, permissões.
-- **Gestão Escolar:** turmas, disciplinas, professores, calendário.
-- **Cadastro de Alunos:** perfil (idade, série, interesses, diagnóstico, habilidades,
-  dificuldades, estratégias que funcionam/não funcionam, objetivos pedagógicos).
-- **Planejamento:** aula, planejamento semanal/mensal, com apoio da IA.
-- **Assistente IA:** chat (texto, futuramente voz) — ex: "Hoje quero trabalhar
-  adição", "João está muito agitado", "Adapte essa atividade para Maria", "Gere um
-  relatório".
-- **Geração de Atividades:** atividades, jogos, desafios, histórias, material para
-  impressão, sempre no contexto informado.
-- **Motor de Adaptação Pedagógica** (módulo separado do gerador): recebe
-  `atividade original + perfil do aluno` → gera nova versão mantendo o objetivo.
-- **Editor:** ajuste de texto, imagens e organização de página antes de imprimir.
-- **PDF:** exportação automática.
-- **Histórico:** atividades, observações, resultados, evolução do aluno.
-- **Relatórios:** visões para professor, coordenador, secretaria.
-- **Biblioteca:** banco de imagens/ilustrações reutilizáveis (animais, frutas,
-  letras, emoções, profissões, formas, objetos) para reduzir custo de geração de
-  imagem por IA.
-
-## 6. Papel da IA (o que ela faz e o que não faz)
-
-A IA **não adivinha** — ela recebe contexto. Ex: professor pede "crie atividade para
-Maria" → a API consulta cadastro, histórico, objetivos, BNCC e observações, e só
-então monta o prompt.
-
-Faz: sugerir atividades, adaptar atividades, explicar BNCC, gerar relatórios,
-resumir observações, apoiar planejamento.
-Não faz: substituir o professor / decidir sozinha sem contexto do aluno.
-
-## 7. Arquitetura — evolução deste repositório
-
-Este projeto (`chatbot`) **é a base** da plataforma, não um projeto à parte. É uma
-evolução direta: o chat com IA que já funciona aqui (auth, UI de conversa, seleção
-de modelo, streaming) vira o ponto de partida do Assistente IA e do restante dos
-módulos é construído em cima dessa fundação.
-
-| Camada | Hipótese original (doc do ChatGPT) | Já existe neste repo | Decisão |
-|---|---|---|---|
-| Frontend | Next.js | ✅ Next.js (App Router) | mantém |
-| Backend | NestJS separado | Next.js API routes (`app/api`) | **[EM ABERTO]** — ver abaixo |
-| Banco | PostgreSQL | ✅ PostgreSQL via Drizzle ORM | mantém |
-| Filas | Redis + BullMQ | ✅ Redis já é dependência (sem BullMQ ainda) | adicionar BullMQ quando houver job assíncrono (ex: geração de PDF em lote) |
-| Storage | Cloudflare R2 | ✅ Cloudflare R2 (via `@aws-sdk/client-s3`, S3-compatible) | decidido — ver nota abaixo |
-| Infra | Docker + Hetzner | Vercel (deploy atual usa `@vercel/*`: functions, analytics, otel) | **[EM ABERTO]** — ver abaixo |
-| IA | OpenAI | AI SDK com múltiplos providers resolvidos (Anthropic/Google/OpenAI/HuggingFace), hoje ativo só com OpenAI (`gpt-5-mini` para chat, tools e título) | volta a bater com a hipótese original — outros providers ficam resolvidos no código mas inertes até haver motivo/chave pra ativar |
-
-**Decisões de arquitetura que essa correção reabre:**
-
-- **Backend separado (NestJS) vs API routes do Next.js:** hoje toda a lógica
-  (chat, auth, modelos) roda dentro do próprio Next.js. Um backend NestJS separado
-  só se justifica se: (a) surgir processamento pesado/assíncrono demais para rodar
-  em serverless (ex: geração de atividades em lote pra rede inteira), ou (b) o
-  frontend passar a ter múltiplos consumidores (app mobile, integração externa)
-  que não deveriam falar direto com o Next.js. Até lá, manter tudo em Next.js reduz
-  complexidade operacional.
-- **Vercel vs Docker+Hetzner:** o repo ainda usa alguns pacotes `@vercel/*`
-  (functions, analytics, otel, bot protection). Migrar pra Hetzner exigiria
-  substituir cada um desses por alternativa self-hosted. Só vale a pena se custo em
-  escala (multi-prefeitura) ou exigência contratual (dado teria que ficar em infra
-  própria/nacional) empurrar nessa direção — comum em contrato público, então vale
-  perguntar isso já na Fase 0.
-- **Vercel Blob → Cloudflare R2:** decidido em 2026-08-05, trocado antes mesmo de
-  sair da Vercel (não depende da decisão de infra acima). Upload de imagem de plano
-  (`app/(chat)/api/files/upload/route.ts`) usa o bucket público `r2.dev` (dev/teste).
-  Antes de produção com dados reais de aluno, revisitar: `r2.dev` não tem SLA e
-  serve tudo publicamente sem controle de acesso — trocar por domínio customizado
-  e/ou URLs assinadas se o conteúdo for sensível.
-
-## 8. Perguntas de descoberta para a reunião com o cliente
-
-Pergunta de abertura, para direcionar toda a conversa:
+Abertura:
 > "Quando um professor chega em casa depois de um dia de aula, qual é a tarefa mais
 > cansativa e repetitiva que vocês gostariam que um sistema fizesse por ele?"
 
-### 8.1 As 10 perguntas mais decisivas (priorizar estas)
+### 9.1 As 12 mais decisivas
 
-1. O planejamento começa pela turma ou pelo aluno? *(define o Modelo A vs B)*
-2. A atividade deve ser criada do zero, adaptada de uma existente, ou apenas
-   sugerida?
+1. O planejamento começa pela turma ou pelo aluno? *(Modelo A vs B, seção 4.1)*
+2. A atividade deve ser criada do zero, adaptada de uma existente, ou só sugerida?
 3. O professor quer conversar com a IA ou apertar um botão e receber tudo pronto?
-4. A IA deve conhecer apenas o aluno selecionado ou todo o contexto da turma?
-5. O sistema será usado durante o planejamento, durante a aula, ou nos dois
-   momentos?
-6. O professor pretende editar tudo que a IA gerar, ou apenas aprovar?
-7. Como vocês avaliam hoje se uma atividade deu certo?
-8. O que mais consome tempo hoje: planejar, adaptar, produzir material, registrar
-   resultado ou fazer relatório?
-9. Quais documentos são obrigatórios para a prefeitura e poderiam ser gerados
-   automaticamente?
-10. Se só pudessem pagar por uma funcionalidade, qual resolveria o maior problema do
+4. O sistema é usado no planejamento, durante a aula, ou nos dois momentos?
+5. O professor edita tudo que a IA gerar, ou só aprova?
+6. **Quando um aluno "dá trabalho" em sala, o que o professor faz hoje?** Pede ajuda a
+   quem? Registra em algum lugar? *(valida a seção 4.3 diretamente)*
+7. **Um conselho de manejo comportamental viraria registro que o professor
+   confia/usaria de fato, ou soaria "a IA tá me avaliando"?** *(risco de percepção da
+   seção 4.3)*
+8. O professor planeja aula por aula ou pensa a semana inteira de uma vez? *(seção 4.2)*
+9. Quais documentos são obrigatórios pra prefeitura e poderiam ser gerados automaticamente?
+10. Como avaliam hoje se uma atividade deu certo?
+11. Como funciona hoje, na prática, a comunicação entre regente e AEE — diálogo direto
+    ou cada um trabalha separado?
+12. Se só pudessem pagar por uma funcionalidade, qual resolveria o maior problema do
     dia a dia?
 
-### 8.2 Lista completa, por tema
+### 9.2 Lista completa, por tema
 
-**Público-alvo:** só Educação Infantil ou também Fundamental I? Suporte a AEE?
-Professores regentes usam ou só o AEE? Foco inicial em alunos atípicos ou todos?
-
-**Fluxo do professor hoje:** como planeja uma aula hoje? Diário, semanal ou mensal?
-As atividades já são adaptadas atualmente? Quanto tempo gasta nisso? Onde ficam
-armazenadas hoje?
-
-**Geração de atividades:** criar do zero, sugerir, adaptar existente, ou só melhorar
-o que o professor já escreveu?
-
-**Fluxo da adaptação:** quando há aluno com TEA/TDAH, hoje o professor cria
-atividade separada, adapta a da turma, ou usa material pronto? Quem decide a
-adaptação — professor, coordenador ou AEE?
+**Público-alvo:** só Educação Infantil ou também Fundamental I? AEE, regente, ou ambos?
 
 **Perfil do aluno:** o que realmente ajuda a IA — idade, série, diagnóstico, laudo,
-interesses, hiperfocos, dificuldades, habilidades, PEI, acompanhante? (medicação
-provavelmente não é necessário)
+interesses, hiperfocos, dificuldades, PEI, acompanhante?
 
-**Evolução:** como acompanham hoje — relatório, PEI, ficha, avaliação periódica?
+**Conselho comportamental (novo, seção 4.3):** situações mais comuns que geram dúvida
+no professor? Prefere resposta rápida (1-2 frases) ou explicação mais longa? Já usa
+algum grupo/pessoa (coordenação, AEE, outro professor) pra esse tipo de dúvida hoje —
+o produto compete ou complementa esse canal?
 
-**BNCC:** quem escolhe o código — professor, coordenação? A prefeitura tem
-currículo próprio além da BNCC?
+**Planejamento semanal (novo, seção 4.2):** hoje já planeja a semana de uma vez, ou
+aula por aula? Precisa de aprovação da coordenação antes de aplicar?
 
-**Planejamento — quem inicia:** professor → IA → atividade, ou coordenação →
-planejamento → professor → atividade?
+**Evolução/histórico:** como acompanham hoje — relatório, PEI, ficha, avaliação
+periódica? Quem mais além do professor vê isso — coordenador, secretaria, família?
 
-**Chat:** para que serve — tirar dúvida, gerar atividade, revisar, planejar,
-conversar no dia a dia?
-
-**Histórico:** o que precisa ficar salvo — conversas, atividades, PDFs,
-observações, avaliações?
-
-**Biblioteca:** professor pode criar, compartilhar e reutilizar atividades próprias?
-
-**Imagens:** precisa ser inédita ou pode usar banco de imagens/ilustrações
-reaproveitadas? Prefeitura tem identidade visual própria?
+**BNCC:** quem escolhe o código — professor, coordenação? Currículo próprio além da BNCC?
 
 **Impressão:** A4, colorido ou P&B? Envia pra pais? Usa tablet?
 
-**Resultados:** professor registra "conseguiu / parcialmente / não conseguiu", ou
-relatório livre?
-
-**Relatórios:** quem visualiza — professor, diretor, coordenação, secretaria?
-
-**Percepção de IA:** "O que vocês imaginam quando falam em IA?" — a resposta pode
-ser bem diferente do que estamos pensando.
-
-**Processo ideal:** "Se não existisse limitação tecnológica, como seria o sistema
-perfeito para vocês?"
-
-**Integrações:** Google Classroom, Microsoft, diário eletrônico, sistema da
-prefeitura, importação de alunos?
-
-**Permissões:** quem pode criar, editar, aprovar, excluir, visualizar?
+**Ferramentas atuais/concorrência:** já conhecem ou testaram Lírios, Prova Adaptada,
+Vínculoo, AulaGen? O que funcionou ou não? A rede já tem plataforma própria (tipo
+"Professor Online" de Fortaleza)? Precisaria integrar ou poderia substituir?
 
 **Escala:** uma escola, dez escolas, ou toda a rede?
 
-**Ferramentas atuais / concorrência (2026-08):** vocês já conhecem ou testaram
-alguma ferramenta de adaptação de atividade com IA (Lírios, Prova Adaptada,
-Vínculoo, Lupa IA)? O que funcionou ou não funcionou? A rede já tem uma
-plataforma própria de planejamento (como o "Professor Online" de Fortaleza)?
-Precisaria integrar com ela ou poderia substituir? Como funciona hoje, na
-prática, a comunicação entre professor regente e professor de AEE — existe
-diálogo direto ou cada um trabalha separado?
+**Permissões:** quem pode criar, editar, aprovar, excluir, visualizar?
 
-## 9. Fases do projeto
+## 10. Fases do projeto
 
 ### Fase 0 — Descoberta e validação (pré-desenvolvimento)
-- Reunião de descoberta com prefeitura/escola usando a seção 8.
-- Validar Modelo A vs B (seção 4.2).
-- Validar quais campos do perfil do aluno são realmente usados na prática.
-- Validar formato de saída esperado (impressão, tablet, PDF, cor).
-- Sair da fase com: 1 fluxo de uso validado, 1 lista de campos de perfil fechada,
-  1 protótipo navegável (Figma ou similar) validado com pelo menos um professor
-  real.
+- Reunião de descoberta usando a seção 9.
+- Validar Modelo A vs B (seção 4.1), o desenho da seção 4.2 e a percepção de risco da
+  seção 4.3 pergunta 7.
+- Validar quais campos de perfil são realmente usados na prática.
+- Sair da fase com: 1 fluxo de uso validado, 1 lista de campos de perfil fechada, 1
+  protótipo navegável validado com pelo menos um professor real.
 
-### Fase 1 — MVP
-- **Ponto de partida:** este repo já resolve auth, UI de chat, streaming e seleção
-  de modelo de IA — não é trabalho de Fase 1, é reaproveitado.
-- Schema novo no Drizzle: turma, aluno (perfil básico), professor, atividade.
-- Planejamento de aula simples (objetivo + BNCC) — pode nascer como uma extensão do
-  chat atual (ex: um modo/ferramenta dentro da conversa) em vez de uma tela nova.
-- Geração de **uma atividade principal** pela IA a partir do objetivo.
-- Adaptação manual: professor pede adaptação para 1 aluno por vez (sem detecção
-  automática ainda).
-- Exportação em PDF.
-- Sem relatórios, sem biblioteca de imagens própria (usa geração de imagem direto
-  ou banco público), sem integrações externas.
-- Objetivo da fase: validar com usuários reais se o fluxo "turma → IA →
-  adaptação" resolve o problema antes de investir em automação.
+### Fase 1 — MVP — **já implementado** (ver `fases.md` § Fase 1 para o detalhamento)
+- Turma → atividade → adaptação por aluno funcionando fim a fim, com as 8 telas do
+  handoff ligadas a dados reais.
+- Exportação em PDF via impressão do navegador (funcional para MVP; pipeline de
+  geração server-side fica pra depois, não é bloqueador).
+- Sem relatórios formais, sem biblioteca de imagens própria, sem integrações externas.
+- **Objetivo pendente:** validar com usuário real se "turma → IA → adaptação" resolve
+  o problema antes de investir mais nos módulos novos (4.2, 4.3) — isso é Fase 0, não
+  Fase 1, e continua não feito.
 
-### Fase 2 — Motor de Adaptação Pedagógica
-- Detecção proativa: ao finalizar atividade, IA sugere quais alunos precisam de
-  adaptação e gera automaticamente mediante confirmação.
-- Motor de adaptação como serviço reutilizável (`atividade original + perfil →
-  nova versão`), não mais um caminho manual dentro do gerador.
-- Início da biblioteca própria de imagens/ilustrações reutilizáveis.
-- Editor de atividade antes da exportação (trocar texto, imagem, reorganizar).
+### Fase 2 — Conselho comportamental + planejamento semanal (novo escopo) — ✅ fechada
+- **2A (planejamento semanal, seção 4.2) — implementado** (2026-08-27, ver
+  `fases.md` § Fase 2A). Sem tela nova; reaproveita `/atividades` e `/plano/:id`.
+- **2B (conselho comportamental, seção 4.3) — implementado** (2026-08-27, ver
+  `fases.md` § Fase 2B). Chat em `/chat/:id` (reaproveitado), registro automático
+  server-side em `studentObservation`, testado ao vivo com contexto real (condição +
+  estratégia eficaz + histórico anterior citados corretamente pela IA).
+- Ainda não feito: detecção proativa de adaptação, motor de adaptação como serviço
+  reutilizável, editor de atividade antes da exportação — ficam pra quando houver
+  sinal de necessidade real (Fase 0/uso real), não foram pedidos agora.
 
 ### Fase 3 — Acompanhamento e relatórios
-- Histórico por aluno: atividades aplicadas, observações, resultado
-  (conseguiu/parcial/não conseguiu).
-- Relatórios para coordenação/secretaria (o que a prefeitura exige hoje, ver
-  pergunta 9 da seção 8.1).
-- PEI / ficha de acompanhamento — não é só boa prática, é obrigação legal
-  (art. 28 da Lei 13.146/2015) quando o aluno tem necessidade específica de
-  aprendizagem, ver 3.2; a Fase 0 valida o formato esperado pela rede, não se
-  deve existir.
+- Relatórios pra coordenação/secretaria.
+- PEI/ficha de acompanhamento alimentado por `studentObservation`/`studentAeeNote` —
+  obrigação legal (art. 28 da Lei 13.146/2015), não feature bônus.
+- Biblioteca própria de imagens/ilustrações reutilizáveis (custo de geração de imagem
+  em escala, ver seção 11).
 
 ### Fase 4 — Escala e integrações
-- Multi-escola / multi-rede, permissões por papel (professor, coordenador,
-  secretaria, admin).
+- Multi-escola/multi-rede, permissões por papel.
 - Integrações (Google Classroom, diário eletrônico, importação de alunos).
-- Assistente por voz (evolução do chat).
+- Assistente por voz.
 
-## 10. Riscos e pontos a monitorar
+## 11. Riscos e pontos a monitorar
 
-- **Não decidir Modelo A/B por suposição** — é a decisão que mais muda a
-  arquitetura de dados (atividade única com derivações vs. atividades
-  independentes por aluno).
-- Custo de geração de imagem por IA pode inviabilizar uso em escala — daí a
-  biblioteca reutilizável ser parte do plano desde a Fase 2, não como otimização
-  tardia.
-- Dado sensível (diagnóstico, laudo, PEI) exige cuidado com LGPD desde o desenho
-  do schema — tratar como requisito de Fase 1, não deixar para depois.
-- **Não é mais oceano azul** (ver 3.1) — Lírios já vende pra prefeitura
-  (recrutando "Municípios Pioneiros 2026"), Prova Adaptada já tem 50 escolas
-  particulares. Diferenciação provável não está em "gerar atividade adaptada"
-  (já existe no mercado), e sim em resolver a colaboração AEE-regente que a
-  pesquisa mostra que falha na prática (3.2) — validar isso como aposta
-  central na Fase 0, não como suposição.
+- **Não decidir Modelo A/B por suposição** (seção 4.1) — muda a arquitetura de dados.
+- **Vínculoo é o concorrente que mais rápido poderia fechar a lacuna da seção 3.2** —
+  16x de crescimento em 12 meses, "Apoio Inteligente" já existe em formato de chat.
+  Reconfirmar na Fase 0 se o diferencial de "conselho ancorado em histórico" ainda está
+  de pé, não assumir estático.
+- **Percepção de "a IA tá me avaliando"** (seção 4.3, pergunta 7) pode matar adoção do
+  conselho comportamental mesmo que a tecnologia funcione — validar tom/enquadramento
+  antes de construir.
+- Custo de geração de imagem por IA pode inviabilizar uso em escala — biblioteca
+  reutilizável já está no plano da Fase 3, não como otimização tardia.
+- Dado sensível (diagnóstico, laudo, PEI, e agora conselho comportamental registrado
+  automaticamente) exige cuidado com LGPD desde o desenho do schema — tratar como
+  requisito de Fase 1/2, não deixar para depois. Ver pergunta em aberto da seção 4.3
+  sobre editar/apagar entradas de histórico.
+- Geração de plano semanal com BNCC (seção 4.2) é mercado disputado — não vender como
+  diferencial, só como redução de fricção.

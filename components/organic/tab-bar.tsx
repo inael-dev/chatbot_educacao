@@ -28,7 +28,11 @@ const DISABLED_TABS = [
   },
 ] as const;
 
-export function TabBar({ active }: { active: "inicio" | "atividades" }) {
+export function TabBar({
+  active,
+}: {
+  active?: "inicio" | "atividades";
+}) {
   return (
     <div className="stab">
       {TABS.map((tab) => (
