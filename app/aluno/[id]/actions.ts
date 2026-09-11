@@ -6,11 +6,21 @@ import { auth } from "@/app/(auth)/auth";
 import {
   createAeeNote,
   createObservacao,
+  createStudentGoal,
+  createStudentLearningPreference,
   deleteObservacao,
+  deleteStudentGoal,
+  deleteStudentLearningPreference,
   findOrCreateConselhoChat,
   getStudentForProfile,
+  updateStudentGoalStatus,
 } from "@/lib/db/queries";
-import type { StudentAeeNote, StudentObservation } from "@/lib/db/schema";
+import type {
+  StudentAeeNote,
+  StudentGoal,
+  StudentLearningPreference,
+  StudentObservation,
+} from "@/lib/db/schema";
 
 async function assertOwnership(studentId: string) {
   const session = await auth();
@@ -102,5 +112,71 @@ export async function responderAeeAction({
       ? "Prof. AEE"
       : (session.user.name ?? session.user.email ?? "Você");
   await createAeeNote({ autor, papel, studentId, texto });
+  revalidatePath(`/aluno/${studentId}`);
+}
+
+export async function adicionarMetaAction({
+  studentId,
+  goal,
+  difficulty,
+}: {
+  studentId: string;
+  goal: string;
+  difficulty?: StudentGoal["difficulty"];
+}) {
+  await assertOwnership(studentId);
+  await createStudentGoal({ difficulty, goal, studentId });
+  revalidatePath(`/aluno/${studentId}`);
+}
+
+export async function atualizarStatusMetaAction({
+  id,
+  studentId,
+  status,
+}: {
+  id: string;
+  studentId: string;
+  status: StudentGoal["status"];
+}) {
+  await assertOwnership(studentId);
+  await updateStudentGoalStatus({ id, status });
+  revalidatePath(`/aluno/${studentId}`);
+}
+
+export async function removerMetaAction({
+  id,
+  studentId,
+}: {
+  id: string;
+  studentId: string;
+}) {
+  await assertOwnership(studentId);
+  await deleteStudentGoal({ id });
+  revalidatePath(`/aluno/${studentId}`);
+}
+
+export async function adicionarEstrategiaAction({
+  studentId,
+  strategy,
+  effectiveness,
+}: {
+  studentId: string;
+  strategy: string;
+  effectiveness: StudentLearningPreference["effectiveness"];
+}) {
+  await assertOwnership(studentId);
+  await createStudentLearningPreference({ effectiveness, strategy, studentId });
+  revalidatePath(`/aluno/${studentId}`);
+}
+
+export async function removerEstrategiaAction({
+  id,
+  studentId,
+}: {
+  id: string;
+  studentId: string;
+}) {
+  await assertOwnership(studentId);
+  await deleteStudentLearningPreference({ id });
   revalidatePath(`/aluno/${studentId}`);
 }

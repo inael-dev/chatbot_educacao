@@ -25,7 +25,7 @@ type PrintViewProps = {
   turmaName: string;
   schoolName: string | null;
   studentName: string;
-  habilidade: string | null;
+  habilidades: string[];
   backHref: string;
 };
 
@@ -34,7 +34,7 @@ export function PrintView({
   turmaName,
   schoolName,
   studentName,
-  habilidade,
+  habilidades,
   backHref,
 }: PrintViewProps) {
   const [bw, setBw] = useState(false);
@@ -123,10 +123,12 @@ export function PrintView({
                   <b>ALUNO:</b>{" "}
                   <span className={styles.fill}>{studentName}</span>
                 </div>
-                {habilidade ? (
+                {habilidades.length > 0 ? (
                   <div className={styles.field}>
                     <b>BNCC:</b>{" "}
-                    <span className={styles.fill}>{habilidade}</span>
+                    <span className={styles.fill}>
+                      {habilidades.join(", ")}
+                    </span>
                   </div>
                 ) : null}
               </div>

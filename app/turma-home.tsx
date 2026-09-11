@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useCallback, useMemo, useState } from "react";
 import { TabBar } from "@/components/organic/tab-bar";
+import { SignOutButton } from "@/components/sign-out-button";
 import type { getTurmaHomeData } from "@/lib/db/queries";
 import { getInitials } from "@/lib/utils";
 
@@ -110,16 +111,19 @@ export function TurmaHome({
             {turma.name}
           </div>
         </div>
-        <div
-          className="av"
-          style={{
-            background: "var(--color-accent-2)",
-            fontSize: 14,
-            height: 40,
-            width: 40,
-          }}
-        >
-          {professorInitials}
+        <div style={{ alignItems: "center", display: "flex", gap: 4 }}>
+          <SignOutButton />
+          <div
+            className="av"
+            style={{
+              background: "var(--color-accent-2)",
+              fontSize: 14,
+              height: 40,
+              width: 40,
+            }}
+          >
+            {professorInitials}
+          </div>
         </div>
       </div>
 
@@ -246,7 +250,11 @@ export function TurmaHome({
             >
               Alunos
             </div>
-            <Link className="btn btn-ghost" href="/aluno/novo" style={{ padding: 0 }}>
+            <Link
+              className="btn btn-ghost"
+              href="/aluno/novo"
+              style={{ padding: 0 }}
+            >
               + Adicionar
             </Link>
           </div>

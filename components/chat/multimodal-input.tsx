@@ -233,6 +233,8 @@ function PureMultimodalInput({
       `${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/chat/${chatId}`
     );
 
+    const trimmed = input.trim();
+
     sendMessage({
       parts: [
         ...attachments.map((attachment) => ({
@@ -241,10 +243,7 @@ function PureMultimodalInput({
           type: "file" as const,
           url: attachment.url,
         })),
-        {
-          text: input,
-          type: "text",
-        },
+        ...(trimmed ? [{ text: trimmed, type: "text" as const }] : []),
       ],
       role: "user",
     });
@@ -282,11 +281,11 @@ function PureMultimodalInput({
 
       if (response.ok) {
         const data = await response.json();
-        const { url, pathname, contentType } = data;
+        const { url, pathname, contentType, name } = data;
 
         return {
           contentType,
-          name: pathname,
+          name: name ?? pathname,
           url,
         };
       }

@@ -34,5 +34,9 @@ export async function cadastrarAlunoAction(formData: FormData) {
     teacherId: session.user.id,
   });
 
-  redirect("/");
+  // A home confirma o cadastro em vez de abrir com "Nenhuma turma criada
+  // ainda", que lia como falha logo depois de um passo bem-sucedido.
+  const displayName = preferredName || name.split(/\s+/)[0];
+
+  redirect(`/?novo=${encodeURIComponent(displayName)}`);
 }

@@ -35,6 +35,25 @@ e pode ser usada como o próprio protótipo navegável desta fase).
 vivo (dev server + Playwright, dados descartáveis criados e removidos). Falta só
 validação com usuário real (Fase 0), não trabalho de engenharia.
 
+**2026-08-28 — correção de fluxo:** o pipeline acima (turma → atividade → adaptação)
+sempre assumiu que `student` já existia no banco — nenhuma tool de IA cria aluno, só
+consulta (`lookupStudent`/`listStudents`). Até esta data, a única forma de um `student`
+entrar em produção era o script de seed; não existia tela de cadastro manual. Corrigido:
+- **Login trocado para CPF único** (`app/(auth)/login`, `app/(auth)/auth.ts`,
+  `lib/cpf.ts`) — substitui email/senha e o modo "guest" por completo. CPF novo cria
+  conta; CPF repetido resume a mesma conta (era isso que causava o "reset" sentido por
+  inael com o guest). Sem senha/PIN — risco de acesso indevido com dado sensível
+  (LGPD) sinalizado e aceito conscientemente por inael via AskUserQuestion, não é
+  descuido; não reabrir essa discussão sem pedido explícito.
+- **Nova tela `/aluno/novo`** — cadastro completo (nome, nome social, condições,
+  interesses), decisão de inael via AskUserQuestion.
+- **Home (`/`) ganhou gate**: professor sem nenhum aluno cadastrado vê CTA pra
+  `/aluno/novo` em vez do CTA de chat — só depois de ter ≥1 aluno é que a tela de
+  turma/chat aparece. Migração `0009` (coluna `user.cpf`, `user.email` virou nullable).
+  Testado ao vivo (dev server real + Playwright contra o Neon real): CPF novo → gate →
+  cadastro → turma; CPF repetido → resume conta; CPF inválido → rejeitado. Dados de
+  teste apagados depois.
+
 ### 1.1 Schema (`lib/db/schema.ts`, migrações 0000-0006)
 - [x] `student` + `studentProfile`/`studentCondition`/`studentInterest`/
   `studentLearningPreference`/`studentSensitivity`/`studentGoal`/`studentAiMemory`.

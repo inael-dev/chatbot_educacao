@@ -33,8 +33,8 @@ async function uploadFile(file: File): Promise<Attachment | null> {
       return null;
     }
 
-    const { url, pathname, contentType } = await response.json();
-    return { contentType, name: pathname, url };
+    const { url, pathname, contentType, name } = await response.json();
+    return { contentType, name: name ?? pathname, url };
   } catch {
     toast.error("Falha ao enviar o arquivo, tente novamente.");
     return null;
@@ -119,6 +119,10 @@ export function NovaAulaChat({
         return;
       }
 
+      // Parte de texto vazia é rejeitada pelo schema de /api/chat (min 1
+      // char): mandar só o anexo, sem escrever nada, dava 400 silencioso.
+      const trimmed = input.trim();
+
       sendMessage({
         parts: [
           ...attachments.map((attachment) => ({
@@ -127,7 +131,7 @@ export function NovaAulaChat({
             type: "file" as const,
             url: attachment.url,
           })),
-          { text: input, type: "text" as const },
+          ...(trimmed ? [{ text: trimmed, type: "text" as const }] : []),
         ],
         role: "user",
       });

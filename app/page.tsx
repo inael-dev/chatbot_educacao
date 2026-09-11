@@ -7,40 +7,9 @@ import {
   getTurmasByTeacherId,
 } from "@/lib/db/queries";
 import { auth } from "./(auth)/auth";
+import { NoStudentsYet } from "./no-students-yet";
+import { NoTurmaYet } from "./no-turma-yet";
 import { TurmaHome } from "./turma-home";
-
-function NoStudentsYet() {
-  return (
-    <OrganicShell className="flex min-h-dvh flex-col items-center justify-center gap-3 p-8 text-center">
-      <h1>Nenhum aluno cadastrado ainda</h1>
-      <p className="text-muted max-w-xs">
-        Antes de montar uma aula, cadastre quem são seus alunos — a IA usa
-        isso pra adaptar de verdade.
-      </p>
-      <a className="btn btn-primary" href="/aluno/novo">
-        Cadastrar aluno
-      </a>
-    </OrganicShell>
-  );
-}
-
-function NoTurmaYet() {
-  return (
-    <OrganicShell className="flex min-h-dvh flex-col items-center justify-center gap-3 p-8 text-center">
-      <h1>Nenhuma turma ainda</h1>
-      <p className="text-muted max-w-xs">
-        Descreva a primeira aula no chat que a gente cria a turma e monta o
-        plano automaticamente.
-      </p>
-      <a className="btn btn-primary" href="/nova-aula">
-        Começar no chat
-      </a>
-      <a className="btn btn-secondary" href="/aluno/novo">
-        Cadastrar outro aluno
-      </a>
-    </OrganicShell>
-  );
-}
 
 function formatDate(date: Date) {
   return new Intl.DateTimeFormat("pt-BR", {
@@ -50,15 +19,19 @@ function formatDate(date: Date) {
   }).format(date);
 }
 
-export default function TurmaPage() {
+type TurmaPageProps = {
+  searchParams: Promise<{ novo?: string }>;
+};
+
+export default function TurmaPage({ searchParams }: TurmaPageProps) {
   return (
     <Suspense fallback={<div className="min-h-dvh" />}>
-      <TurmaPageContent />
+      <TurmaPageContent searchParams={searchParams} />
     </Suspense>
   );
 }
 
-async function TurmaPageContent() {
+async function TurmaPageContent({ searchParams }: TurmaPageProps) {
   const session = await auth();
 
   if (!session?.user) {
@@ -71,17 +44,22 @@ async function TurmaPageContent() {
     return <NoStudentsYet />;
   }
 
+  // Presente só no redirect vindo de /aluno/novo: o nome de quem acabou de
+  // ser cadastrado, pra tela abrir confirmando em vez de anunciar a ausência
+  // de turma.
+  const { novo: justCreatedName } = await searchParams;
+
   const turmas = await getTurmasByTeacherId({ teacherId: session.user.id });
   const [activeTurma] = turmas;
 
   if (!activeTurma) {
-    return <NoTurmaYet />;
+    return <NoTurmaYet justCreatedName={justCreatedName} />;
   }
 
   const data = await getTurmaHomeData({ turmaId: activeTurma.id });
 
   if (!data) {
-    return <NoTurmaYet />;
+    return <NoTurmaYet justCreatedName={justCreatedName} />;
   }
 
   const professorInitials = (session.user.name ?? session.user.email ?? "?")

@@ -35,9 +35,10 @@ export const planoSchema = z.object({
 export const saveAtividade = ({ session, chatId }: SaveAtividadeProps) =>
   tool({
     description:
-      "Salva no sistema a atividade planejada para a turma e as versões adaptadas para os alunos sinalizados, como rascunho para revisão posterior. Use só depois de já ter: (1) o plano completo definido — tema, objetivo, recursos, habilidades BNCC confirmadas via lookupBnccHabilidade, metodologia em momentos, avaliação — e apresentado ao professor no chat; (2) para cada aluno que vai receber adaptação, já ter consultado lookupStudent e gerado uma versão completa do plano preservando o mesmo objetivo pedagógico. Nunca invente studentId — use sempre o id retornado por lookupStudent.",
+      "Salva no sistema a atividade planejada para a turma e as versões adaptadas para os alunos sinalizados, como rascunho para revisão posterior. Use só depois de já ter: (1) o plano completo definido — tema, objetivo, recursos, habilidades BNCC confirmadas via lookupBnccHabilidade, metodologia em momentos, avaliação — (o plano vai nos campos desta tool, não escrito no chat); (2) para cada aluno que vai receber adaptação, já ter consultado lookupStudent e gerado uma versão completa do plano preservando o mesmo objetivo pedagógico. Nunca invente studentId — use sempre o id retornado por lookupStudent.",
     execute: async ({
       turmaNome,
+      turmaAno,
       objetivo,
       plano,
       sourceFileUrl,
@@ -45,6 +46,7 @@ export const saveAtividade = ({ session, chatId }: SaveAtividadeProps) =>
     }) => {
       const activeTurma = await resolveActiveTurma({
         teacherId: session.user.id,
+        turmaAno,
         turmaNome,
       });
 
@@ -95,11 +97,17 @@ export const saveAtividade = ({ session, chatId }: SaveAtividadeProps) =>
         .describe(
           "URL do arquivo anexado pelo professor, se a atividade veio de um upload de plano existente"
         ),
+      turmaAno: z
+        .string()
+        .optional()
+        .describe(
+          "Ano/série da turma, se dedutível do que o professor disse (ex: '5º ano'). Só é usado quando a turma ainda não existe."
+        ),
       turmaNome: z
         .string()
         .optional()
         .describe(
-          "Nome da turma, se o professor mencionar (ex: '1º ano B'). Se omitido, usa a turma padrão do professor."
+          "Nome da turma, deduzido do que o professor disse (ex: '5º ano B'). Só é usado quando a turma ainda não existe; depois disso a turma ativa do professor é usada e este campo é ignorado."
         ),
     }),
   });

@@ -47,6 +47,6 @@ export const config = {
     "/api/:path*",
     "/login",
 
-    "/((?!_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt).*)",
+    "/((?!_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt|images/|.*\\.(?:png|jpg|jpeg|gif|webp|avif|svg|ico)$).*)",
   ],
 };

@@ -59,6 +59,10 @@ export async function POST(request: Request) {
     const filename = (formData.get("file") as File).name;
     const safeName = filename.replace(/[^a-zA-Z0-9._-]/g, "_");
     const pathname = `${nanoid()}-${safeName}`;
+    // O nome viaja no corpo de /api/chat, cujo schema limita a 100 chars. O
+    // pathname já gasta 22 desses com o nanoid, então nome de arquivo longo
+    // estourava o teto e o envio morria com 400 sem mensagem nenhuma.
+    const displayName = (filename || safeName).slice(0, 100);
     const fileBuffer = Buffer.from(await file.arrayBuffer());
 
     try {
@@ -73,6 +77,7 @@ export async function POST(request: Request) {
 
       return NextResponse.json({
         contentType: file.type,
+        name: displayName,
         pathname,
         url: `${process.env.R2_PUBLIC_URL}/${pathname}`,
       });

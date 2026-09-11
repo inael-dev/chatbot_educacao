@@ -12,7 +12,12 @@ import { useRouter } from "next/navigation";
 import { type ChangeEvent, type FormEvent, useCallback, useState } from "react";
 import { toast } from "sonner";
 import {
+  adicionarEstrategiaAction,
+  adicionarMetaAction,
+  atualizarStatusMetaAction,
   registrarObservacaoAction,
+  removerEstrategiaAction,
+  removerMetaAction,
   removerObservacaoAction,
   responderAeeAction,
   startConselhoChatAction,
@@ -24,7 +29,12 @@ import type {
   getStudentAdaptacaoContext,
   getStudentHistorico,
 } from "@/lib/db/queries";
-import type { Student, StudentObservation } from "@/lib/db/schema";
+import type {
+  Student,
+  StudentGoal,
+  StudentLearningPreference,
+  StudentObservation,
+} from "@/lib/db/schema";
 import { getInitials } from "@/lib/utils";
 
 type StudentContext = Awaited<ReturnType<typeof getStudentAdaptacaoContext>>;
@@ -44,6 +54,49 @@ const TIPO_DOT_COLOR: Record<StudentObservation["tipo"], string> = {
   barreira: "var(--color-accent-400)",
   neutro: "var(--color-neutral-400)",
   positivo: "var(--color-accent-2-500)",
+};
+
+const STATUS_OPTIONS: { value: StudentGoal["status"]; label: string }[] = [
+  { label: "Não iniciado", value: "not_started" },
+  { label: "Em andamento", value: "in_progress" },
+  { label: "Alcançado", value: "achieved" },
+  { label: "Pausado", value: "paused" },
+];
+
+const DIFFICULTY_OPTIONS: {
+  value: NonNullable<StudentGoal["difficulty"]>;
+  label: string;
+}[] = [
+  { label: "Fácil", value: "easy" },
+  { label: "Médio", value: "medium" },
+  { label: "Difícil", value: "hard" },
+];
+
+const DIFFICULTY_LABEL: Record<
+  NonNullable<StudentGoal["difficulty"]>,
+  string
+> = {
+  easy: "Fácil",
+  hard: "Difícil",
+  medium: "Médio",
+};
+
+const EFFECTIVENESS_OPTIONS: {
+  value: StudentLearningPreference["effectiveness"];
+  label: string;
+}[] = [
+  { label: "Baixa", value: "low" },
+  { label: "Média", value: "medium" },
+  { label: "Alta", value: "high" },
+];
+
+const EFFECTIVENESS_LABEL: Record<
+  StudentLearningPreference["effectiveness"],
+  string
+> = {
+  high: "Alta",
+  low: "Baixa",
+  medium: "Média",
 };
 
 function formatDate(date: Date) {
@@ -180,6 +233,194 @@ function ObservacaoForm({
   );
 }
 
+function MetaForm({
+  studentId,
+  onDone,
+}: {
+  studentId: string;
+  onDone: () => void;
+}) {
+  const [goal, setGoal] = useState("");
+  const [difficulty, setDifficulty] = useState<
+    StudentGoal["difficulty"] | undefined
+  >(undefined);
+  const [isSaving, setIsSaving] = useState(false);
+
+  const handleGoalChange = useCallback(
+    (event: ChangeEvent<HTMLTextAreaElement>) => setGoal(event.target.value),
+    []
+  );
+
+  const handleDifficultyClick = useCallback(
+    (event: React.MouseEvent<HTMLButtonElement>) => {
+      const value = event.currentTarget.dataset
+        .difficulty as StudentGoal["difficulty"];
+      setDifficulty((prev) => (prev === value ? undefined : value));
+    },
+    []
+  );
+
+  const handleSubmit = useCallback(
+    async (event: FormEvent) => {
+      event.preventDefault();
+      if (!goal.trim()) {
+        return;
+      }
+      setIsSaving(true);
+      try {
+        await adicionarMetaAction({ difficulty, goal, studentId });
+        toast.success("Objetivo adicionado.");
+        onDone();
+      } catch {
+        toast.error("Não foi possível adicionar.");
+      } finally {
+        setIsSaving(false);
+      }
+    },
+    [difficulty, goal, onDone, studentId]
+  );
+
+  return (
+    <form
+      className="card elev-sm"
+      onSubmit={handleSubmit}
+      style={{ gap: 8, padding: 12 }}
+    >
+      <textarea
+        className="input"
+        onChange={handleGoalChange}
+        placeholder="Ex: Ampliar o tempo de permanência nas atividades"
+        style={{ minHeight: 50 }}
+        value={goal}
+      />
+      <div style={{ display: "flex", gap: 6 }}>
+        {DIFFICULTY_OPTIONS.map((opt) => (
+          <button
+            className="tag"
+            data-difficulty={opt.value}
+            key={opt.value}
+            onClick={handleDifficultyClick}
+            style={{
+              background:
+                difficulty === opt.value
+                  ? "var(--color-accent)"
+                  : "var(--color-neutral-100)",
+              color:
+                difficulty === opt.value
+                  ? "var(--color-bg)"
+                  : "var(--color-text)",
+              cursor: "pointer",
+            }}
+            type="button"
+          >
+            {opt.label}
+          </button>
+        ))}
+      </div>
+      <button
+        className="btn btn-primary btn-block"
+        disabled={isSaving || !goal.trim()}
+        type="submit"
+      >
+        {isSaving ? "Salvando…" : "Salvar objetivo"}
+      </button>
+    </form>
+  );
+}
+
+function EstrategiaForm({
+  studentId,
+  onDone,
+}: {
+  studentId: string;
+  onDone: () => void;
+}) {
+  const [strategy, setStrategy] = useState("");
+  const [effectiveness, setEffectiveness] =
+    useState<StudentLearningPreference["effectiveness"]>("medium");
+  const [isSaving, setIsSaving] = useState(false);
+
+  const handleStrategyChange = useCallback(
+    (event: ChangeEvent<HTMLInputElement>) => setStrategy(event.target.value),
+    []
+  );
+
+  const handleEffectivenessClick = useCallback(
+    (event: React.MouseEvent<HTMLButtonElement>) => {
+      const value = event.currentTarget.dataset
+        .effectiveness as StudentLearningPreference["effectiveness"];
+      setEffectiveness(value);
+    },
+    []
+  );
+
+  const handleSubmit = useCallback(
+    async (event: FormEvent) => {
+      event.preventDefault();
+      if (!strategy.trim()) {
+        return;
+      }
+      setIsSaving(true);
+      try {
+        await adicionarEstrategiaAction({ effectiveness, strategy, studentId });
+        toast.success("Estratégia adicionada.");
+        onDone();
+      } catch {
+        toast.error("Não foi possível adicionar.");
+      } finally {
+        setIsSaving(false);
+      }
+    },
+    [effectiveness, onDone, strategy, studentId]
+  );
+
+  return (
+    <form
+      className="card elev-sm"
+      onSubmit={handleSubmit}
+      style={{ gap: 8, padding: 12 }}
+    >
+      <input
+        className="input"
+        onChange={handleStrategyChange}
+        placeholder="Ex: Rotina visual estruturada"
+        value={strategy}
+      />
+      <div style={{ display: "flex", gap: 6 }}>
+        {EFFECTIVENESS_OPTIONS.map((opt) => (
+          <button
+            className="tag"
+            data-effectiveness={opt.value}
+            key={opt.value}
+            onClick={handleEffectivenessClick}
+            style={{
+              background:
+                effectiveness === opt.value
+                  ? "var(--color-accent)"
+                  : "var(--color-neutral-100)",
+              color:
+                effectiveness === opt.value
+                  ? "var(--color-bg)"
+                  : "var(--color-text)",
+              cursor: "pointer",
+            }}
+            type="button"
+          >
+            {opt.label}
+          </button>
+        ))}
+      </div>
+      <button
+        className="btn btn-primary btn-block"
+        disabled={isSaving || !strategy.trim()}
+        type="submit"
+      >
+        {isSaving ? "Salvando…" : "Salvar estratégia"}
+      </button>
+    </form>
+  );
+}
+
 export function AlunoProfile({
   student,
   studentContext,
@@ -202,6 +443,8 @@ export function AlunoProfile({
     null
   );
   const [isStartingConselho, setIsStartingConselho] = useState(false);
+  const [isMetaFormOpen, setIsMetaFormOpen] = useState(false);
+  const [isEstrategiaFormOpen, setIsEstrategiaFormOpen] = useState(false);
 
   const displayName = student.preferredName || student.name;
   const idade = calcIdade(student.birthDate);
@@ -209,6 +452,64 @@ export function AlunoProfile({
   const handleBack = useCallback(() => router.back(), [router]);
   const handleOpenForm = useCallback(() => setIsFormOpen(true), []);
   const handleCloseForm = useCallback(() => setIsFormOpen(false), []);
+  const handleOpenMetaForm = useCallback(() => setIsMetaFormOpen(true), []);
+  const handleCloseMetaForm = useCallback(() => setIsMetaFormOpen(false), []);
+  const handleOpenEstrategiaForm = useCallback(
+    () => setIsEstrategiaFormOpen(true),
+    []
+  );
+  const handleCloseEstrategiaForm = useCallback(
+    () => setIsEstrategiaFormOpen(false),
+    []
+  );
+
+  const handleStatusChange = useCallback(
+    async (event: ChangeEvent<HTMLSelectElement>) => {
+      const { id } = event.currentTarget.dataset;
+      const status = event.target.value as StudentGoal["status"];
+      if (!id) {
+        return;
+      }
+      try {
+        await atualizarStatusMetaAction({ id, status, studentId: student.id });
+      } catch {
+        toast.error("Não foi possível atualizar o status.");
+      }
+    },
+    [student.id]
+  );
+
+  const handleRemoverMeta = useCallback(
+    async (event: React.MouseEvent<HTMLButtonElement>) => {
+      const { id } = event.currentTarget.dataset;
+      if (!id) {
+        return;
+      }
+      try {
+        await removerMetaAction({ id, studentId: student.id });
+        toast.success("Objetivo removido.");
+      } catch {
+        toast.error("Não foi possível remover.");
+      }
+    },
+    [student.id]
+  );
+
+  const handleRemoverEstrategia = useCallback(
+    async (event: React.MouseEvent<HTMLButtonElement>) => {
+      const { id } = event.currentTarget.dataset;
+      if (!id) {
+        return;
+      }
+      try {
+        await removerEstrategiaAction({ id, studentId: student.id });
+        toast.success("Estratégia removida.");
+      } catch {
+        toast.error("Não foi possível remover.");
+      }
+    },
+    [student.id]
+  );
 
   const handleConversarClick = useCallback(async () => {
     setIsStartingConselho(true);
@@ -374,6 +675,206 @@ export function AlunoProfile({
           <MessageCircleIcon size={16} strokeWidth={2.75} />
           {isStartingConselho ? "Abrindo…" : `Conversar sobre ${displayName}`}
         </button>
+
+        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+          <div
+            style={{
+              alignItems: "center",
+              display: "flex",
+              justifyContent: "space-between",
+            }}
+          >
+            <div
+              style={{
+                color: "var(--color-text)",
+                fontFamily: "var(--font-heading)",
+                fontSize: 16,
+              }}
+            >
+              Objetivos
+            </div>
+            <button
+              onClick={handleOpenMetaForm}
+              style={{
+                alignItems: "center",
+                background: "none",
+                border: "none",
+                color: "var(--color-accent)",
+                cursor: "pointer",
+                display: "flex",
+                fontSize: 12.5,
+                gap: 3,
+              }}
+              type="button"
+            >
+              <PlusIcon size={13} strokeWidth={2.75} />
+              Adicionar objetivo
+            </button>
+          </div>
+
+          {isMetaFormOpen ? (
+            <MetaForm onDone={handleCloseMetaForm} studentId={student.id} />
+          ) : null}
+
+          {studentContext.goals.length === 0 ? (
+            <p className="text-muted" style={{ fontSize: 13 }}>
+              Nenhum objetivo cadastrado ainda.
+            </p>
+          ) : (
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              {studentContext.goals.map((g) => (
+                <div
+                  className="card elev-sm"
+                  key={g.id}
+                  style={{ padding: 10 }}
+                >
+                  <div
+                    style={{
+                      alignItems: "flex-start",
+                      display: "flex",
+                      gap: 8,
+                      justifyContent: "space-between",
+                    }}
+                  >
+                    <p style={{ flex: 1, fontSize: 13, margin: 0 }}>{g.goal}</p>
+                    <button
+                      aria-label="Remover objetivo"
+                      data-id={g.id}
+                      onClick={handleRemoverMeta}
+                      style={{
+                        background: "none",
+                        border: "none",
+                        color: "var(--color-muted)",
+                        cursor: "pointer",
+                        padding: 0,
+                      }}
+                      type="button"
+                    >
+                      <XIcon size={13} strokeWidth={2.5} />
+                    </button>
+                  </div>
+                  <div
+                    style={{
+                      alignItems: "center",
+                      display: "flex",
+                      gap: 6,
+                      marginTop: 6,
+                    }}
+                  >
+                    <select
+                      className="input"
+                      data-id={g.id}
+                      onChange={handleStatusChange}
+                      style={{
+                        fontSize: 11.5,
+                        height: "auto",
+                        padding: "3px 6px",
+                      }}
+                      value={g.status}
+                    >
+                      {STATUS_OPTIONS.map((opt) => (
+                        <option key={opt.value} value={opt.value}>
+                          {opt.label}
+                        </option>
+                      ))}
+                    </select>
+                    {g.difficulty ? (
+                      <span className="tag tag-neutral">
+                        {DIFFICULTY_LABEL[g.difficulty]}
+                      </span>
+                    ) : null}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+          <div
+            style={{
+              alignItems: "center",
+              display: "flex",
+              justifyContent: "space-between",
+            }}
+          >
+            <div
+              style={{
+                color: "var(--color-text)",
+                fontFamily: "var(--font-heading)",
+                fontSize: 16,
+              }}
+            >
+              Estratégias pedagógicas
+            </div>
+            <button
+              onClick={handleOpenEstrategiaForm}
+              style={{
+                alignItems: "center",
+                background: "none",
+                border: "none",
+                color: "var(--color-accent)",
+                cursor: "pointer",
+                display: "flex",
+                fontSize: 12.5,
+                gap: 3,
+              }}
+              type="button"
+            >
+              <PlusIcon size={13} strokeWidth={2.75} />
+              Adicionar estratégia
+            </button>
+          </div>
+
+          {isEstrategiaFormOpen ? (
+            <EstrategiaForm
+              onDone={handleCloseEstrategiaForm}
+              studentId={student.id}
+            />
+          ) : null}
+
+          {studentContext.learningPreferences.length === 0 ? (
+            <p className="text-muted" style={{ fontSize: 13 }}>
+              Nenhuma estratégia cadastrada ainda.
+            </p>
+          ) : (
+            <div className="card elev-sm" style={{ gap: 8, padding: 12 }}>
+              {studentContext.learningPreferences.map((p) => (
+                <div
+                  key={p.id}
+                  style={{
+                    alignItems: "center",
+                    display: "flex",
+                    gap: 8,
+                    justifyContent: "space-between",
+                  }}
+                >
+                  <p style={{ flex: 1, fontSize: 13, margin: 0 }}>
+                    {p.strategy}
+                  </p>
+                  <span className="tag tag-neutral">
+                    {EFFECTIVENESS_LABEL[p.effectiveness]}
+                  </span>
+                  <button
+                    aria-label="Remover estratégia"
+                    data-id={p.id}
+                    onClick={handleRemoverEstrategia}
+                    style={{
+                      background: "none",
+                      border: "none",
+                      color: "var(--color-muted)",
+                      cursor: "pointer",
+                      padding: 0,
+                    }}
+                    type="button"
+                  >
+                    <XIcon size={13} strokeWidth={2.5} />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
 
         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
           <div

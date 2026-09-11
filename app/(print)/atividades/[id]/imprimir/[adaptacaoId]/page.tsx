@@ -38,7 +38,7 @@ async function ImprimirAdaptacaoPageContent({
     <PrintView
       backHref="/atividades"
       content={result.adaptacao.content}
-      habilidade={result.adaptacao.content.habilidades[0] ?? null}
+      habilidades={result.adaptacao.content.habilidades ?? []}
       schoolName={result.schoolName}
       studentName={result.student.preferredName || result.student.name}
       turmaName={result.turmaName}

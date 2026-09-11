@@ -333,7 +333,13 @@ export async function POST(request: Request) {
               reasoningSummary: "detailed",
             } satisfies OpenAILanguageModelResponsesOptions,
           },
-          stopWhen: isStepCount(5),
+          // O fluxo de planejamento gasta um passo por tool: listStudents,
+          // lookupStudent por aluno, lookupBnccHabilidade por código (a tool
+          // aceita um código por chamada) e saveAtividade. Com 5 passos o
+          // modelo era cortado no meio e a atividade nunca chegava a ser
+          // salva. Teto alto o bastante pra fechar o fluxo dentro dos 60s de
+          // maxDuration.
+          stopWhen: isStepCount(16),
           telemetry: {
             functionId: "stream-text",
             isEnabled: isProductionEnvironment,

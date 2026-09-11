@@ -33,7 +33,9 @@ import {
   type Student,
   type StudentAeeNote,
   type StudentCondition,
+  type StudentGoal,
   type StudentInterest,
+  type StudentLearningPreference,
   type StudentObservation,
   type Suggestion,
   stream,
@@ -690,6 +692,19 @@ export async function createStudentWithDetails({
         : Promise.resolve(),
     ]);
 
+    // `resolveActiveTurma` só popula a turma no momento em que a cria, com os
+    // alunos que já existiam. Sem vincular aqui, todo aluno cadastrado depois
+    // da primeira aula ficaria fora da turma — invisível na home e ignorado
+    // nas adaptações. Antes da primeira turma existir não há o que vincular:
+    // o backfill de `resolveActiveTurma` cobre esse caso.
+    const [activeTurma] = await getTurmasByTeacherId({ teacherId });
+    if (activeTurma) {
+      await addStudentsToTurma({
+        studentIds: [created.id],
+        turmaId: activeTurma.id,
+      });
+    }
+
     return created;
   } catch (error) {
     throw new ChatbotError("bad_request:database", { cause: error });
@@ -953,9 +968,7 @@ export async function findOrCreateConselhoChat({
     const [existing] = await db
       .select()
       .from(chat)
-      .where(
-        and(eq(chat.studentId, studentId), eq(chat.userId, teacherId))
-      )
+      .where(and(eq(chat.studentId, studentId), eq(chat.userId, teacherId)))
       .orderBy(desc(chat.createdAt))
       .limit(1);
 
@@ -1009,6 +1022,78 @@ export async function createAeeNote({
       .values({ autor, papel, studentId, texto })
       .returning();
     return created;
+  } catch (error) {
+    throw new ChatbotError("bad_request:database", { cause: error });
+  }
+}
+
+export async function createStudentGoal({
+  studentId,
+  goal,
+  difficulty,
+}: {
+  studentId: string;
+  goal: string;
+  difficulty?: StudentGoal["difficulty"];
+}): Promise<StudentGoal> {
+  try {
+    const [created] = await db
+      .insert(studentGoal)
+      .values({ difficulty, goal, studentId })
+      .returning();
+    return created;
+  } catch (error) {
+    throw new ChatbotError("bad_request:database", { cause: error });
+  }
+}
+
+export async function updateStudentGoalStatus({
+  id,
+  status,
+}: {
+  id: string;
+  status: StudentGoal["status"];
+}) {
+  try {
+    await db.update(studentGoal).set({ status }).where(eq(studentGoal.id, id));
+  } catch (error) {
+    throw new ChatbotError("bad_request:database", { cause: error });
+  }
+}
+
+export async function deleteStudentGoal({ id }: { id: string }) {
+  try {
+    await db.delete(studentGoal).where(eq(studentGoal.id, id));
+  } catch (error) {
+    throw new ChatbotError("bad_request:database", { cause: error });
+  }
+}
+
+export async function createStudentLearningPreference({
+  studentId,
+  strategy,
+  effectiveness,
+}: {
+  studentId: string;
+  strategy: string;
+  effectiveness: StudentLearningPreference["effectiveness"];
+}): Promise<StudentLearningPreference> {
+  try {
+    const [created] = await db
+      .insert(studentLearningPreference)
+      .values({ effectiveness, strategy, studentId })
+      .returning();
+    return created;
+  } catch (error) {
+    throw new ChatbotError("bad_request:database", { cause: error });
+  }
+}
+
+export async function deleteStudentLearningPreference({ id }: { id: string }) {
+  try {
+    await db
+      .delete(studentLearningPreference)
+      .where(eq(studentLearningPreference.id, id));
   } catch (error) {
     throw new ChatbotError("bad_request:database", { cause: error });
   }
@@ -1099,12 +1184,17 @@ export async function getTurmasByTeacherId({
 // first activity of any kind (daily or weekly) auto-creates their default
 // turma and backfills it with every existing student, so the AI tools never
 // have to ask "which turma?" before the professor has created one.
+// `turmaNome`/`turmaAno` come from what the professor already said in the
+// chat ("aula de frações pro 5º ano B"); "Minha turma" is the last-resort
+// fallback, not the expected outcome.
 export async function resolveActiveTurma({
   teacherId,
   turmaNome,
+  turmaAno,
 }: {
   teacherId: string;
   turmaNome?: string;
+  turmaAno?: string;
 }): Promise<Turma> {
   const turmas = await getTurmasByTeacherId({ teacherId });
   const [activeTurma] = turmas;
@@ -1114,6 +1204,7 @@ export async function resolveActiveTurma({
   }
 
   const [created] = await createTurma({
+    grade: turmaAno,
     name: turmaNome || "Minha turma",
     teacherId,
   });

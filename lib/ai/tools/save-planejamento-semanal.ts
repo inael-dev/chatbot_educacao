@@ -19,9 +19,7 @@ const diaSchema = z.object({
     .array(
       z.object({
         plano: planoSchema,
-        studentId: z
-          .string()
-          .describe("id do aluno, obtido via lookupStudent"),
+        studentId: z.string().describe("id do aluno, obtido via lookupStudent"),
         studentName: z.string(),
       })
     )
@@ -30,7 +28,9 @@ const diaSchema = z.object({
     ),
   diaAplicacao: z
     .string()
-    .describe("Dia da semana ou data desse plano, ex: 'Segunda-feira' ou '22/09'"),
+    .describe(
+      "Dia da semana ou data desse plano, ex: 'Segunda-feira' ou '22/09'"
+    ),
   objetivo: z.string().describe("Objetivo pedagógico desse dia específico"),
   plano: planoSchema,
 });
@@ -42,9 +42,16 @@ export const savePlanejamentoSemanal = ({
   tool({
     description:
       "Salva no sistema o planejamento semanal da turma: cria uma atividade por dia informado pelo professor. Use quando o professor descrever ou anexar o planejamento de VÁRIOS dias de uma vez (ex: já traz o plano da semana inteira pronto, dia a dia) — para uma única aula, use `saveAtividade`, não esta. Adaptação por aluno em cada dia é OPCIONAL nesta chamada: inclua em `dias[].adaptacoes` só se o professor já indicou quais alunos adaptar para aquele dia específico na própria conversa; caso contrário deixe vazio e ele adapta depois, dia a dia, na revisão.",
-    execute: async ({ turmaNome, objetivoGeral, sourceFileUrl, dias }) => {
+    execute: async ({
+      turmaNome,
+      turmaAno,
+      objetivoGeral,
+      sourceFileUrl,
+      dias,
+    }) => {
       const activeTurma = await resolveActiveTurma({
         teacherId: session.user.id,
+        turmaAno,
         turmaNome,
       });
 
@@ -109,11 +116,17 @@ export const savePlanejamentoSemanal = ({
         .describe(
           "URL do arquivo anexado pelo professor, se o planejamento semanal veio de um upload"
         ),
+      turmaAno: z
+        .string()
+        .optional()
+        .describe(
+          "Ano/série da turma, se dedutível do que o professor disse (ex: '5º ano'). Só é usado quando a turma ainda não existe."
+        ),
       turmaNome: z
         .string()
         .optional()
         .describe(
-          "Nome da turma, se o professor mencionar (ex: '1º ano B'). Se omitido, usa a turma padrão do professor."
+          "Nome da turma, deduzido do que o professor disse (ex: '5º ano B'). Só é usado quando a turma ainda não existe; depois disso a turma ativa do professor é usada e este campo é ignorado."
         ),
     }),
   });
